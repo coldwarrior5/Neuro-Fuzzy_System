@@ -1,10 +1,21 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
+using ANFIS.ANN;
+using ANFIS.Handlers;
 
 namespace ANFIS.Structures
 {
 	public static class InputParams
 	{
+		public static void FillTrainSetChoices(ComboBox loadTrainSetBox, ComboBox functionsBox)
+		{
+			FileHandler fileHandler = new FileHandler();
+			List<string> files = fileHandler.FileList();
+			FillComboBox(loadTrainSetBox, files);
+			FillComboBox(functionsBox, Functions.GetFunctions());
+		}
+
 		public static void SetClasses(TableLayoutPanel panel, int numSymbols, int numSamples)
 		{
 			int columnCount = numSymbols > 4 ? 5 : numSymbols;
@@ -48,6 +59,17 @@ namespace ANFIS.Structures
 				panel.Controls.Add(button);
 				panel.Controls.Add(label);
 			}
+		}
+
+		private static void FillComboBox<T>(ComboBox comboBox, List<T> items)
+		{
+			comboBox.Items.Clear();
+			foreach (var item in items)
+			{
+				comboBox.Items.Add(item.ToString());
+			}
+			if (comboBox.Items.Count > 0)
+				comboBox.SelectedItem = comboBox.Items[0];
 		}
 	}
 }

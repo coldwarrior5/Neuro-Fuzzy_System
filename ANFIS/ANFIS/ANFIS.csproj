@@ -63,8 +63,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ANN\Abstract\AFunction.cs" />
     <Compile Include="ANN\CriterionFunction.cs" />
+    <Compile Include="ANN\Functions.cs" />
     <Compile Include="ANN\Interfaces\IActivationFunction.cs" />
+    <Compile Include="ANN\Interfaces\IFunction.cs" />
     <Compile Include="ANN\Interfaces\INeuron.cs" />
     <Compile Include="ANN\NeuralNetwork.cs" />
     <Compile Include="ANN\Neuron.cs" />

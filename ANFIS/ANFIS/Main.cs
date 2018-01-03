@@ -107,15 +107,19 @@ namespace ANFIS
 		{
 			if (!(sender is Panel panel)) return;
 			if (!panel.Visible) return;
-			
+			InputParams.FillTrainSetChoices(loadTrainSet, comboBoxFunction);
 			buttonLoadTrainSet.Enabled = loadTrainSet.SelectedItem != null;
 		}
-
-		// TODO popup widow for selecting sample function
+		
 		private void CreateTrainSet_Click(object sender, EventArgs e)
 		{
+			panelFunction.Visible = true;
+		}
+
+		private void ButtonFunction_Click(object sender, EventArgs e)
+		{
 			
-			
+			panelFunction.Visible = false;
 		}
 
 		private void ButtonLoadTrainSet_Click(object sender, EventArgs e)
@@ -129,6 +133,7 @@ namespace ANFIS
 		private void ButtonTrainSet_Click(object sender, EventArgs e)
 		{
 			UiHandler.SetSlider(panelSlider, buttonTrainSet.Top, buttonTrainSet.Height);
+			InputParams.FillTrainSetChoices(loadTrainSet, comboBoxFunction);
 			buttonTrain.Enabled = false;
 			buttonResult.Enabled = false;
 			UiHandler.PanelVisible(panelTrainSet, _panels);
@@ -319,6 +324,7 @@ namespace ANFIS
 			UiHandler.SetSlider(panelSlider, buttonResult.Top, buttonResult.Height);
 			UiHandler.PanelVisible(panelResult, _panels);
 		}
+		
 		// ______________________________________________________________
 	}
 }

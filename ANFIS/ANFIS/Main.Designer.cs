@@ -30,9 +30,9 @@ namespace ANFIS
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-			System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-			System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
+			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+			System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+			System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
 			this.progressionPanel = new System.Windows.Forms.FlowLayoutPanel();
 			this.panelIcon = new System.Windows.Forms.Panel();
 			this.buttonTrainSet = new System.Windows.Forms.Button();
@@ -42,6 +42,10 @@ namespace ANFIS
 			this.buttonExit = new System.Windows.Forms.Button();
 			this.panelSlider = new System.Windows.Forms.Panel();
 			this.panelTrainSet = new System.Windows.Forms.Panel();
+			this.panelFunction = new System.Windows.Forms.Panel();
+			this.labelFunction = new System.Windows.Forms.Label();
+			this.buttonFunction = new System.Windows.Forms.Button();
+			this.comboBoxFunction = new System.Windows.Forms.ComboBox();
 			this.loadTrainSet = new System.Windows.Forms.ComboBox();
 			this.labelLoadTrainSet = new System.Windows.Forms.Label();
 			this.buttonLoadTrainSet = new System.Windows.Forms.Button();
@@ -72,6 +76,7 @@ namespace ANFIS
 			this.progressionPanel.SuspendLayout();
 			this.titleBar.SuspendLayout();
 			this.panelTrainSet.SuspendLayout();
+			this.panelFunction.SuspendLayout();
 			this.panelTrain.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.errorChart)).BeginInit();
 			this.panelResult.SuspendLayout();
@@ -184,6 +189,7 @@ namespace ANFIS
 			// 
 			// panelTrainSet
 			// 
+			this.panelTrainSet.Controls.Add(this.panelFunction);
 			this.panelTrainSet.Controls.Add(this.loadTrainSet);
 			this.panelTrainSet.Controls.Add(this.labelLoadTrainSet);
 			this.panelTrainSet.Controls.Add(this.buttonLoadTrainSet);
@@ -195,6 +201,47 @@ namespace ANFIS
 			this.panelTrainSet.Size = new System.Drawing.Size(625, 562);
 			this.panelTrainSet.TabIndex = 6;
 			this.panelTrainSet.VisibleChanged += new System.EventHandler(this.ParamsPanel_Visible);
+			// 
+			// panelFunction
+			// 
+			this.panelFunction.Controls.Add(this.labelFunction);
+			this.panelFunction.Controls.Add(this.buttonFunction);
+			this.panelFunction.Controls.Add(this.comboBoxFunction);
+			this.panelFunction.Location = new System.Drawing.Point(157, 74);
+			this.panelFunction.Name = "panelFunction";
+			this.panelFunction.Size = new System.Drawing.Size(300, 283);
+			this.panelFunction.TabIndex = 12;
+			this.panelFunction.Visible = false;
+			// 
+			// labelFunction
+			// 
+			this.labelFunction.AutoSize = true;
+			this.labelFunction.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.labelFunction.Location = new System.Drawing.Point(88, 56);
+			this.labelFunction.Name = "labelFunction";
+			this.labelFunction.Size = new System.Drawing.Size(138, 21);
+			this.labelFunction.TabIndex = 2;
+			this.labelFunction.Text = "Choose function";
+			// 
+			// buttonFunction
+			// 
+			this.buttonFunction.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonFunction.Location = new System.Drawing.Point(52, 170);
+			this.buttonFunction.Name = "buttonFunction";
+			this.buttonFunction.Size = new System.Drawing.Size(207, 48);
+			this.buttonFunction.TabIndex = 1;
+			this.buttonFunction.Text = "Create train set";
+			this.buttonFunction.UseVisualStyleBackColor = true;
+			this.buttonFunction.Click += new System.EventHandler(this.ButtonFunction_Click);
+			// 
+			// comboBoxFunction
+			// 
+			this.comboBoxFunction.DropDownWidth = 350;
+			this.comboBoxFunction.FormattingEnabled = true;
+			this.comboBoxFunction.Location = new System.Drawing.Point(27, 106);
+			this.comboBoxFunction.Name = "comboBoxFunction";
+			this.comboBoxFunction.Size = new System.Drawing.Size(250, 29);
+			this.comboBoxFunction.TabIndex = 0;
 			// 
 			// loadTrainSet
 			// 
@@ -401,21 +448,21 @@ namespace ANFIS
 			// 
 			// errorChart
 			// 
-			chartArea1.Name = "ChartArea1";
-			this.errorChart.ChartAreas.Add(chartArea1);
+			chartArea2.Name = "ChartArea1";
+			this.errorChart.ChartAreas.Add(chartArea2);
 			this.errorChart.Location = new System.Drawing.Point(114, 0);
 			this.errorChart.Name = "errorChart";
 			this.errorChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Pastel;
-			series1.ChartArea = "ChartArea1";
-			series1.Name = "SymbolError";
-			this.errorChart.Series.Add(series1);
+			series2.ChartArea = "ChartArea1";
+			series2.Name = "SymbolError";
+			this.errorChart.Series.Add(series2);
 			this.errorChart.Size = new System.Drawing.Size(411, 194);
 			this.errorChart.TabIndex = 3;
 			this.errorChart.Text = "Per character error";
-			title1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
-			title1.Name = "Title1";
-			title1.Text = "Per character error";
-			this.errorChart.Titles.Add(title1);
+			title2.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
+			title2.Name = "Title1";
+			title2.Text = "Per character error";
+			this.errorChart.Titles.Add(title2);
 			// 
 			// Train
 			// 
@@ -517,6 +564,8 @@ namespace ANFIS
 			this.titleBar.ResumeLayout(false);
 			this.panelTrainSet.ResumeLayout(false);
 			this.panelTrainSet.PerformLayout();
+			this.panelFunction.ResumeLayout(false);
+			this.panelFunction.PerformLayout();
 			this.panelTrain.ResumeLayout(false);
 			this.panelTrain.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.errorChart)).EndInit();
@@ -564,6 +613,10 @@ namespace ANFIS
 		private Label labelTotalError;
 		private Label labelTotalErrorStatic;
 		private TableLayoutPanel resultClasses;
+		private Panel panelFunction;
+		private Label labelFunction;
+		private Button buttonFunction;
+		private ComboBox comboBoxFunction;
 	}
 }
 

@@ -15,11 +15,6 @@ namespace ANFIS.Handlers
 			_screen = drawingBoard;
 		}
 
-		public void AddPoint(int x, int y)
-		{
-			Draw(x, y);
-		}
-
 		private void Draw(int x, int y)
 		{
 			if (x >= _screen.Width || x < 0)
@@ -28,11 +23,6 @@ namespace ANFIS.Handlers
 				return;
 			((Bitmap)_screen.Image).SetPixel(x, y, Color.Black);
 			_screen.Refresh();
-		}
-
-		public void ResetPoints()
-		{
-			ClearBoard();
 		}
 
 		private void ClearBoard()
