@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace ANFIS.Handlers
+namespace ANFIS.Handlers.GUI
 {
 	public class Drawer
 	{
@@ -14,7 +14,7 @@ namespace ANFIS.Handlers
 				throw new ArgumentException("Picture box must have image.");
 			_screen = drawingBoard;
 		}
-
+		
 		private void Draw(int x, int y)
 		{
 			if (x >= _screen.Width || x < 0)

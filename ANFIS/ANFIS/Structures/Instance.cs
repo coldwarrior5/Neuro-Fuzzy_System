@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ANFIS.Structures
 {
@@ -17,13 +18,21 @@ namespace ANFIS.Structures
 			Samples = new Sample[NumSamples];
 		}
 
-		public void AddSample(double[] variables)
+		public void AddSample(double[] variables, double value)
 		{
 			if(variables.Length != NumVariables)
 				throw new Exception("There are too many defined variables.");
-			if (_index + 1 > NumVariables)
+			if (_index + 1 > NumSamples)
 				throw new Exception("There are too many samples.");
-			Samples[_index++] = new Sample(variables);
+			Samples[_index++] = new Sample(variables, value);
+		}
+
+		public void AddSamples(List<Sample> samples)
+		{
+			for (int i = 0; i < NumSamples; i++)
+			{
+				Samples[i] = samples[i];
+			}
 		}
 
 		protected bool Equals(Instance other)

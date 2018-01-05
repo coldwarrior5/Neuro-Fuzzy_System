@@ -1,6 +1,6 @@
 ﻿using ANFIS.Structures;
 
-namespace ANFIS.Interfaces
+namespace ANFIS.Handlers.IO.Interfaces
 {
 	public interface IParser
 	{

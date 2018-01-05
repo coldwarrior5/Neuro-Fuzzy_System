@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using ANFIS.Interfaces;
+using ANFIS.Handlers.IO.Interfaces;
 
-namespace ANFIS.Handlers
+namespace ANFIS.Handlers.IO
 {
 	public class FileHandler : IFileHandler
 	{

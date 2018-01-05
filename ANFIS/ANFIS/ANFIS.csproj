@@ -63,26 +63,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ANN\Abstract\AFunction.cs" />
+    <Compile Include="Handlers\Mathematics\Abstract\AFunction.cs" />
     <Compile Include="ANN\CriterionFunction.cs" />
-    <Compile Include="ANN\Functions.cs" />
+    <Compile Include="Handlers\Mathematics\Functions.cs" />
     <Compile Include="ANN\Interfaces\IActivationFunction.cs" />
-    <Compile Include="ANN\Interfaces\IFunction.cs" />
+    <Compile Include="Handlers\Mathematics\Interface\IFunction.cs" />
     <Compile Include="ANN\Interfaces\INeuron.cs" />
     <Compile Include="ANN\NeuralNetwork.cs" />
     <Compile Include="ANN\Neuron.cs" />
     <Compile Include="ANN\ActivationFunctions.cs" />
     <Compile Include="ANN\NeuronLayer.cs" />
-    <Compile Include="Handlers\Drawer.cs" />
-    <Compile Include="Handlers\ErrorHandler.cs" />
-    <Compile Include="Handlers\FileHandler.cs" />
-    <Compile Include="Handlers\MathHandler.cs" />
-    <Compile Include="Handlers\Parser.cs" />
-    <Compile Include="Handlers\UIHandler.cs" />
+    <Compile Include="Handlers\GUI\Drawer.cs" />
+    <Compile Include="Handlers\Error\ErrorHandler.cs" />
+    <Compile Include="Handlers\IO\FileHandler.cs" />
+    <Compile Include="Handlers\Mathematics\MathHandler.cs" />
+    <Compile Include="Handlers\IO\Parser.cs" />
+    <Compile Include="Handlers\GUI\UIHandler.cs" />
+    <Compile Include="Handlers\Mathematics\Sampler.cs" />
     <Compile Include="Structures\BackpropagationType.cs" />
     <Compile Include="Structures\InputParams.cs" />
-    <Compile Include="Interfaces\IFileHandler.cs" />
-    <Compile Include="Interfaces\IParser.cs" />
+    <Compile Include="Handlers\IO\Interfaces\IFileHandler.cs" />
+    <Compile Include="Handlers\IO\Interfaces\IParser.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -129,8 +130,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\Button.png" />
-    <Content Include="Images\ButtonHighlighted.png" />
     <None Include="Resources\brain-stock-photo-icon.ico" />
     <None Include="Resources\IconMain.ico" />
     <None Include="Resources\Icon2.ico" />

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using ANFIS.Handlers;
+using ANFIS.Handlers.Error;
+using ANFIS.Handlers.GUI;
 
 namespace ANFIS
 {

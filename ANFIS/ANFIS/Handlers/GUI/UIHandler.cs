@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace ANFIS.Handlers
+namespace ANFIS.Handlers.GUI
 {
 	public static class UiHandler
 	{

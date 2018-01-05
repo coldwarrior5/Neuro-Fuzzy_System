@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using ANFIS.ANN.Interfaces;
-using ANFIS.Handlers;
+using ANFIS.Handlers.Mathematics;
 
 namespace ANFIS.ANN
 {

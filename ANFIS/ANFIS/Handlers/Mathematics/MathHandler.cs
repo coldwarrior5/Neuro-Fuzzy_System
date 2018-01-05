@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ANFIS.Handlers
+namespace ANFIS.Handlers.Mathematics
 {
 	public static class MathHandler
 	{
-		public static Random Rand = new Random();
+		public static readonly Random Rand = new Random();
 
 		public static double ArithmeticMean(List<double> values)
 		{
@@ -37,23 +37,19 @@ namespace ANFIS.Handlers
 			return value < min ? min : value > max ? max : value;
 		}
 
-		public static void FindDivisor(int number, out int numBatches, out int perBatchElements)
+		public static void IncrementRolloverArray(int[] starts, int[] ends, double[] tempVariableSet)
 		{
-			int[] divisors = {2, 3, 5, 7, 11, 13};
-			numBatches = -1;
-			perBatchElements = -1;
+			int numVariables = tempVariableSet.Length;
+			if (numVariables != starts.Length || numVariables != ends.Length)
+				throw new ArgumentException("There needs to exactly limits as are the variables.");
 
-			foreach (int divisor in divisors)
+			bool rollover = false;
+			for (int k = 0; k < numVariables; k++)
 			{
-				numBatches = (int) Math.DivRem(number, divisor, out long remainder);
-				if (remainder != 0)
-				{
-					numBatches = number;
-					perBatchElements = 1;
-					continue;
-				}
-				perBatchElements = divisor;
-				break;
+				if (k != 0 && rollover == false)
+					break;
+				rollover = tempVariableSet[k] + 1 > ends[k];
+				tempVariableSet[k] = (tempVariableSet[k] - starts[k] + 1) % (ends[k] - starts[k] + 1) + starts[k];
 			}
 		}
 	}

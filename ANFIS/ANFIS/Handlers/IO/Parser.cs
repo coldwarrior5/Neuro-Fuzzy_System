@@ -1,8 +1,9 @@
 ﻿using System.Text.RegularExpressions;
-using ANFIS.Interfaces;
+using ANFIS.Handlers.Error;
+using ANFIS.Handlers.IO.Interfaces;
 using ANFIS.Structures;
 
-namespace ANFIS.Handlers
+namespace ANFIS.Handlers.IO
 {
 	public class Parser : IParser
 	{
@@ -62,8 +63,9 @@ namespace ANFIS.Handlers
 					if (j != input.NumVariables - 1)
 						result[i + displacement] += "',";
 					else
-						result[i + displacement] += "']";
+						result[i + displacement] += "'], ";
 				}
+				result[i + displacement] += "['" + input.Samples[i].Value + "']";
 			}
 			return result;
 		}
@@ -106,6 +108,7 @@ namespace ANFIS.Handlers
 		private void ParseSample(string line, int position)
 		{
 			double[] variables = new double[_numVariables];
+			double[] value = new double[1];
 
 			if (_iSamples++ >= _numSamples)
 				ErrorHandler.TerminateExecution(ErrorCode.TooManySamples);
@@ -113,13 +116,14 @@ namespace ANFIS.Handlers
 			var splits = line.Split(' ');
 			if(FillDoubleArray(variables, splits[1], position))
 				ErrorHandler.TerminateExecution(ErrorCode.ImproperLine, "Line " + position + " must have " + _numVariables + " variables in total.");
-
-			_instance.AddSample(variables);
+			if (FillDoubleArray(value, splits[2], position))
+				ErrorHandler.TerminateExecution(ErrorCode.ImproperLine, "Line " + position + " must have defined value for the sample.");
+			_instance.AddSample(variables, value[0]);
 		}
 
 		private static bool FillDoubleArray(double[] values, string line, int position)
 		{
-			int i = 0;
+			int i = -1;
 			if (line != null)
 			{
 				var matches = Regex.Matches(line, "[-0-9.]+");

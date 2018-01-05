@@ -4,7 +4,10 @@ using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
 using ANFIS.ANN;
-using ANFIS.Handlers;
+using ANFIS.Handlers.Error;
+using ANFIS.Handlers.GUI;
+using ANFIS.Handlers.IO;
+using ANFIS.Handlers.Mathematics;
 using ANFIS.Structures;
 
 namespace ANFIS
@@ -118,7 +121,9 @@ namespace ANFIS
 
 		private void ButtonFunction_Click(object sender, EventArgs e)
 		{
-			
+			Sampler.HardcodedSampling(Functions.GetFunction(comboBoxFunction.SelectedItem.ToString()), out _instance, _parser);
+			InputParams.FillTrainSetChoices(loadTrainSet, comboBoxFunction);
+			buttonLoadTrainSet.Enabled = loadTrainSet.SelectedItem != null;
 			panelFunction.Visible = false;
 		}
 

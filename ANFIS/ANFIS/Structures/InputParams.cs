@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using ANFIS.ANN;
-using ANFIS.Handlers;
+using ANFIS.Handlers.IO;
+using ANFIS.Handlers.Mathematics;
 
 namespace ANFIS.Structures
 {

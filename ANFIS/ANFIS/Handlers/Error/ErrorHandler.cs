@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ANFIS.Handlers
+namespace ANFIS.Handlers.Error
 {
     public enum ErrorCode
     {
