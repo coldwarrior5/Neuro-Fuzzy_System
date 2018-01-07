@@ -1,143 +1,99 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
+using ANFIS.ANN.Functions;
 using ANFIS.ANN.Interfaces;
+using ANFIS.ANN.Structures;
 using ANFIS.Structures;
+using ILNumerics;
+using ILNumerics.Drawing;
+using ILNumerics.Drawing.Plotting;
 using BackpropagationHandler = ANFIS.Structures.Backpropagation;
-using ContentAlignment = System.Drawing.ContentAlignment;
 
 namespace ANFIS.ANN
 {
 	public class NeuralNetwork
 	{
-		public int NumberOfLayers { get; private set; }
-		private List<int> _architecture;
-		private IActivationFunction _function;
-		private IActivationFunction _outputLayerFunction;
-		private List<NeuronLayer> _layers;
+		public int NumberOfLayers { get; }
+		private INeuronLayer[] _layers;
+		private LayerInfo[] _architecture;
+		public int NumberOfRules { get; set; }
 		private BackpropagationType _bacpropagationType;
-		private double _eta;
-		private double _desiredError;
-		private double[] _perSymbolError;
+		public double Eta { get; set; }
+		public double DesiredError { get; set; }
 		public double TotalError { get; private set; }
-		private Instance _instance;
-		private double[][] _yLayer;
-		private double[][] _deltaLayer;
+		public List<double> ErrorTimeline { get; private set; }
+		public Instance Instance { get; }
 
+		private double[] _averageProbabilityOutcome;
+		private double[] _probabilityOutcome;
+		private double[] _z;
+
+		public const int RulesMin = 1;
+		public const int RulesDefault = 10;
+		public const int RulesMax = 50;
 
 		public const double EtaMin = 0.0001;
-		public const double EtaDefault = 0.1;
+		public const double EtaDefault = 0.01;
 		public const double EtaMax = 1;
 
 		public const double DesiredErrorMin = 0;
-		public const double DesiredErrorDefault = 0.0001;
-		public const double DesiredErrorMax = 5;
+		public const double DesiredErrorDefault = 100;
+		public const double DesiredErrorMax = 100;
 
-		public const int IterationLimit = 10000;
-
-		public const int NeuronMin = 1;
-		private readonly int _neuronDefault;
-		private List<double> _changes;
-		public const int NeuronMax = 200;
-
-		public const int LayersMin = 3;
-		public const int LayersMax = 10;
+		public const int IterationLimit = 100000;
+		public const int TimeLimit = 120; // in seconds
 
 		public const double RefreshRate = 0.25; // Every quarter a second update the graph
 
-		// TODO refactor neural network definition network should looks completely different
-		public NeuralNetwork(Instance instance, IActivationFunction function = null, IActivationFunction outputLayerFunction = null)
+		public NeuralNetwork(Instance instance)
 		{
-			_instance = instance;
-			int inputSize = instance.NumVariables * 2;
-			int outputSize = 1;
-			_neuronDefault = outputSize;
-			_desiredError = DesiredErrorDefault;
-			_eta = EtaDefault;
-			List<int> architecture = new List<int> {inputSize, _neuronDefault, outputSize};
-			InitNeuralNetwork(architecture, function, outputLayerFunction);
-		}
-
-		private void InitNeuralNetwork(List<int> architecture, IActivationFunction function = null, IActivationFunction outputLayerFunction = null)
-		{
-			if (architecture.Count < LayersMin)
-				throw new ArgumentException(@"Architecture must contain at least one hidden layer!", architecture.ToString());
-			NumberOfLayers = architecture.Count;
-			_architecture = architecture;
-			_function = function;
-			_outputLayerFunction = outputLayerFunction;
-			_perSymbolError = new double[_instance.NumSamples];
-
-			ResetTraining();
-		}
-
-		public void AddLayer()
-		{
-			NumberOfLayers++;
-			_architecture.Insert(_architecture.Count - 1, _neuronDefault);
-		}
-
-		public void RemoveLayer()
-		{
-			NumberOfLayers--;
-			_architecture.RemoveAt(_architecture.Count - 1);
-		}
-
-		public void UpdateLayer(int index, int value)
-		{
-			if (index == 0 || index == NumberOfLayers - 1)
-				throw new Exception("Input and output layers cannot be changed!");
-			_architecture[index] = value;
-		}
-
-		public void ChangeEta(double eta)
-		{
-			_eta = eta;
-		}
-
-		public double GetEta()
-		{
-			return _eta;
-		}
-
-		public void ChangeDesiredError(double desiredError)
-		{
-			_desiredError = desiredError;
-		}
-
-		public double GetDesiredError()
-		{
-			return _desiredError;
+			Instance = instance;
+			NumberOfRules = RulesDefault;
+			DesiredError = DesiredErrorDefault;
+			Eta = EtaDefault;
+			ErrorTimeline = new List<double>();
+			NumberOfLayers = 5;
+			_layers = new INeuronLayer[NumberOfLayers];
 		}
 
 		private void InitNetwork()
 		{
-			_layers = new List<NeuronLayer>();
-			_yLayer = new double[NumberOfLayers][];
-			_deltaLayer = new double[NumberOfLayers][];
-			for (int i = 0; i < NumberOfLayers; i++)
+			DefineArchitecture(out LayerInfo[] architecture);
+			if (_architecture is null || _architecture.Equals(architecture))
 			{
-				int numberOfNeuronsInFormerLayer = i == 0 ? 0 : _architecture[i - 1];
-				IActivationFunction currentFunction = i == NumberOfLayers - 1 ? _outputLayerFunction : _function;
-				_layers.Add(new NeuronLayer(_architecture[i], numberOfNeuronsInFormerLayer, currentFunction));
-				_yLayer[i] = new double[_architecture[i]];
-				_deltaLayer[i] = new double[_architecture[i]];
+				_architecture = architecture;
+				for (int i = 0; i < NumberOfLayers; i++)
+					_layers[i] = new NeuronLayer(architecture[i], Instance.NumVariables);
 			}
+			
 			Evaluate();
 		}
 
-		public void Train(Chart chart, Label totalError, Button testNetwork)
+		private void DefineArchitecture(out LayerInfo[] architecture)
+		{
+			architecture = new LayerInfo[NumberOfLayers];
+			architecture[0] = new LayerInfo ( 1, NumberOfRules * Instance.NumVariables, NeuronType.Input );
+			architecture[1] = new LayerInfo ( Instance.NumVariables, NumberOfRules, NeuronType.Multiplication );
+			architecture[2] = new LayerInfo ( NumberOfRules, NumberOfRules, NeuronType.Normalization );
+			architecture[3] = new LayerInfo ( 1, NumberOfRules, NeuronType.Function );
+			architecture[4] = new LayerInfo ( NumberOfRules, 1, NeuronType.Output );
+		}
+
+		public void Train(ILPanel panel, Label totalError, Button testNetwork)
 		{
 			InitNetwork();
 			int iter = 0;
 			List<List<Sample>> batches = FormBatches();
+			Stopwatch totalTime = new Stopwatch();
 			Stopwatch stopwatch = new Stopwatch();
 			stopwatch.Start();
-			while (TotalError > _desiredError && iter++ < IterationLimit)
+			totalTime.Start();
+			while (TotalError > DesiredError && iter++ < IterationLimit && totalTime.Elapsed.TotalSeconds < TimeLimit)
 			{
 				Backpropagation(batches);
 				stopwatch.Stop();
@@ -147,7 +103,7 @@ namespace ANFIS.ANN
 					continue;
 				}
 				Evaluate();
-				FillChart(chart, totalError, this);
+				UpdateInfo(panel, totalError, this);
 				stopwatch.Restart();
 			}
 			testNetwork.Enabled = true;
@@ -161,12 +117,12 @@ namespace ANFIS.ANN
 				case BackpropagationType.Batch:
 					batches = new List<List<Sample>>
 					{
-						_instance.Samples.ToList()
+						Instance.Samples.ToList()
 					};
 					break;
 				case BackpropagationType.Online:
 					batches = new List<List<Sample>>();
-					foreach (Sample t in _instance.Samples)
+					foreach (Sample t in Instance.Samples)
 						batches.Add(new List<Sample> {t});
 					break;
 			}
@@ -175,66 +131,109 @@ namespace ANFIS.ANN
 
 		private void Backpropagation(List<List<Sample>> batches)
 		{
-			InitChanges(out List<List<double>> changes);
-			/*
+			InitChanges(out List<List<double>> antecedentChanges, NumberOfRules * Instance.NumVariables, 2);
+			InitChanges(out List<List<double>> consequenseChanges, NumberOfRules, Instance.NumVariables + 1);
 			// Go through every batch
 			for (int i = 0; i < batches.Count; i++)
 			{
-				// Go through every simbol in the batch
+				// Go through every sample in the batch
 				for (int j = 0; j < batches[i].Count; j++)
 				{
+					// Get all ai and bi
+					List<double[]> parameters = new List<double[]>();
+					for (int k = 0; k < NumberOfRules * Instance.NumVariables; k++)
+						parameters.Add(_layers[0].GetParameters(k));
+
 					// Determine layer outputs
-					GetOutputs(batches[i][j].Variables[0], batches[i][j].Variables[1]);
-					// Go through each layer and evaluate delta
-					for (int k = NumberOfLayers - 1; k > 0; k--)
-					{
-						bool outputLayer = k == NumberOfLayers - 1;
-						double[] input = _yLayer[k - 1];
-						double[] output = _yLayer[k];
-						double[] deltaOrDesired = outputLayer ? Array.ConvertAll(batches[i][j].Class, element => (double)element) : _deltaLayer[k + 1];
-						_changes = changes[k - 1];
-						if (outputLayer)
-						{
-							_layers[k].Backpropagation(input, output, ref _deltaLayer[k], deltaOrDesired, ref _changes);
-						}
-						else
-						{
-							_layers[k].Backpropagation(input, output, ref _deltaLayer[k], deltaOrDesired, _layers[k + 1].GetNeurons() , ref _changes);
-						}
-					}
+					double[] givenOutput = GetOutput(batches[i][j].Variables);
+					
+					CalculateAntecedentChange(ref antecedentChanges, batches[i][j].Value, givenOutput[0], batches[i][j].Variables, parameters);
+					CalculateConsequenceChange(ref consequenseChanges, batches[i][j].Value, givenOutput[0], batches[i][j].Variables);
 				}
-
-				// Multiply each change with learning rate
-				for (int j = 0; j < changes.Count; j++)
-				{
-					for (int k = 0; k < changes[j].Count; k++)
-					{
-						changes[j][k] *= _eta;
-					}
-				}
-
+				// Need to average the change and assign learning rate
+				AverageAndMultiplyWithLearningRate(ref antecedentChanges, batches[i].Count);
+				AverageAndMultiplyWithLearningRate(ref consequenseChanges, batches[i].Count);
 				// Apply change after single batch
-				for (int j = 1; j < NumberOfLayers; j++)
-				{
-					_layers[j].ApplyChange(changes[j - 1]);
-				}
-				ResetChanges(ref changes);
+				_layers[0].UpdateParameters(antecedentChanges);
+				_layers[3].UpdateParameters(consequenseChanges);
+				// Now set changes to zero
+				ResetChanges(ref antecedentChanges);
+				ResetChanges(ref consequenseChanges);
 			}
-			*/
 		}
 
-		//TODO see about init weight
-		private void InitChanges(out List<List<double>> changes)
+		private void CalculateAntecedentChange(ref List<List<double>> changes, double expectedOutput, double givenOutput, double[] variables, List<double[]> parameters)
+		{
+			double difference = expectedOutput - givenOutput;
+			CalculateDividend(out List<double> dividend);
+			CalculateDivisor(out double divisor);
+			for (int i = 0; i < Instance.NumVariables; i++)
+			{
+				for (int j = 0; j < NumberOfRules; j++)
+				{
+					double otherProbabilities = 1;
+					for (int k = 0; k < Instance.NumVariables; k++)
+					{
+						if(k == i) continue;
+						otherProbabilities *= _probabilityOutcome[k * NumberOfRules + j];
+					}
+					double tempValue = difference * (dividend[j] / divisor) *_probabilityOutcome[i * NumberOfRules + j] * (1 - _probabilityOutcome[i * NumberOfRules + j]) * otherProbabilities;
+					changes[i * NumberOfRules + j][0] += tempValue * parameters[i][1];
+					changes[i * NumberOfRules + j][1] += tempValue * (parameters[i][0] - variables[i]);
+				}
+			}
+		}
+
+		private void CalculateDivisor(out double divisor)
+		{
+			divisor = 0;
+			for (int i = 0; i < NumberOfRules; i++)
+			{
+				divisor += Math.Pow(_averageProbabilityOutcome[i], 2);
+			}
+		}
+
+		private void CalculateDividend(out List<double> dividend)
+		{
+			dividend = new List<double>(new double[NumberOfRules]);
+
+			for (int i = 0; i < NumberOfRules; i++)
+			{
+				for (int j = 0; j < NumberOfRules; j++)
+				{
+					dividend[i] += _averageProbabilityOutcome[j] * (_z[i] - _z[j]);
+				}
+			}
+		}
+
+		private void CalculateConsequenceChange(ref List<List<double>> changes, double expectedOutput, double givenOutput, double[] variables)
+		{
+			for (int i = 0; i < NumberOfRules; i++)
+			{
+				double tempValue = (expectedOutput - givenOutput) * _averageProbabilityOutcome[i];
+				for (int j = 0; j < Instance.NumVariables; j++)
+					changes[i][j] += tempValue * variables[j];
+				changes[i][Instance.NumVariables] += tempValue;
+			}
+		}
+
+		private void AverageAndMultiplyWithLearningRate(ref List<List<double>> changes, int batchSize)
+		{
+			for (int i = 0; i < changes.Count; i++)
+			{
+				for (int j = 0; j < changes[i].Count; j++)
+					changes[i][j] = changes[i][j] / batchSize * Eta;
+			}
+		}
+
+		private void InitChanges(out List<List<double>> changes, int size, int variableSize)
 		{
 			changes = new List<List<double>>();
-			// No changes for input layer
-			for (int i = 0; i < NumberOfLayers - 1; i++)
+			for (int i = 0; i < size; i++)
 			{
 				changes.Add(new List<double>());
-				for (int j = 0; j < _architecture[i] * _architecture[i + 1]; j++)
-				{
+				for (int j = 0; j < variableSize; j++)
 					changes[i].Add(0);
-				}
 			}
 		}
 
@@ -249,78 +248,61 @@ namespace ANFIS.ANN
 			}
 		}
 
-		public void ResetNetwork()
+		public void ResetTraining()
 		{
-			for (var i = 0; i < NumberOfLayers; i++)
+			TotalError = 0;
+			ErrorTimeline.Clear();
+			if (_architecture is null)
+				return;
+			for (int i = 0; i < NumberOfLayers; i++)
 			{
 				_layers[i].ResetLayer();
 			}
 		}
 
-		public void ResetTraining()
-		{
-			TotalError = 0;
-			for (int i = 0; i < _instance.NumSamples; i++)
-				_perSymbolError[i] = 0;
-
-			_layers = new List<NeuronLayer>();
-			_yLayer = new double[NumberOfLayers][];
-			_deltaLayer = new double[NumberOfLayers][];
-		}
-
-		public double[] GetOutputs(double[] xValues, double[] yValues)
-		{
-			double[] input = FormatInput(xValues, yValues);
-			return GetOutputs(input);
-		}
-
-		private double[] FormatInput(double[] xValues, double[] yValues)
-		{
-			return xValues.Concat(yValues).ToArray();
-		}
-
-		private double[] GetOutputs(double[] inputs)
+		private double[] GetOutput(double[] inputs)
 		{
 			double[] tempInputs = inputs;
 			for (var i = 0; i < NumberOfLayers; i++)
 			{
 				try
 				{
-					tempInputs = _yLayer[i] = _layers[i].GetOutputs(tempInputs);
+					tempInputs = _layers[i].GetOutputs(tempInputs, inputs);
+					switch (i)
+					{
+						case 0:
+							_probabilityOutcome = tempInputs;
+							break;
+						case 2:
+							_averageProbabilityOutcome = tempInputs;
+							break;
+						case 3:
+							_z = tempInputs;
+							break;
+					}
 				}
 				catch(Exception)
 				{
 					return null;
 				}
-				
 			}
 			return tempInputs;
 		}
 
-		public List<int> GetArchitecture()
-		{
-			return _architecture;
-		}
-
 		public void Evaluate()
 		{
-			/*
 			TotalError = 0;
-			double[][] givenOutputs = new double[_instance.Samples.Length][];
-			int[][] expectedOutputs = new int[_instance.Samples.Length][];
+			double[] givenOutputs = new double[Instance.Samples.Length];
+			double[] expectedOutputs = new double[Instance.Samples.Length];
 			
-			for (int i = 0; i < _instance.Samples.Length; i++)
+			for (int i = 0; i < Instance.Samples.Length; i++)
 			{
-				givenOutputs[i] = GetOutputs(_instance.Samples[i].XPositions, _instance.Samples[i].YPositions);
-				expectedOutputs[i] = _instance.Samples[i].Class;
+				double[] temp = GetOutput(Instance.Samples[i].Variables);
+				givenOutputs[i] = temp[0];
+				expectedOutputs[i] = Instance.Samples[i].Value;
 			}
 
-			_perSymbolError = CriterionFunction.EvaluatePerSymbol(givenOutputs, expectedOutputs);
-			for (int i = 0; i < _instance.NumSamples; i++)
-			{
-				TotalError += _perSymbolError[i];
-			}
-			*/
+			TotalError = Error.Evaluate(givenOutputs, expectedOutputs);
 		}
 
 		public void OnValueChanged_Type(object sender, EventArgs e)
@@ -331,102 +313,101 @@ namespace ANFIS.ANN
 			}
 		}
 
-		public bool Consistent()
+		private static TResult Convert<TResult>(Func<double[], TResult> f, params double[] args)
 		{
-			if (_layers.Count != _architecture.Count)
-				return false;
-			for (int i = 0; i < _layers.Count; i++)
-			{
-				if (_layers[i].NumberOfNeurons != _architecture[i])
-					return false;
-			}
-			return true;
+			TResult result = f(args);
+			return result;
 		}
 
-		public void FixArchitecture()
+		public static void FillTrainChoices(ILPanel panel, Label totalError, TextBox rules, ComboBox backpropagationType, TextBox eta, TextBox desiredError, NeuralNetwork ann)
 		{
-			_architecture = new List<int>();
-			foreach (NeuronLayer t in _layers)
-			{
-				_architecture.Add(t.NumberOfNeurons);
-			}
-			NumberOfLayers = _architecture.Count;
-		}
-
-		public static void FillTrainChoices(Chart graph, Label totalError, TableLayoutPanel layoutArchitecture, ComboBox backpropagationType, TextBox eta, TextBox desiredError, NeuralNetwork ann)
-		{
-			FillChart(graph, totalError, ann);
-			FillPanel(layoutArchitecture, ann);
+			InitPanel(panel, ann);
+			totalError.Text = ann.TotalError.ToString(CultureInfo.InvariantCulture);
+			rules.Text = RulesDefault.ToString(CultureInfo.InvariantCulture);
 			FillTypeChoices(backpropagationType);
 			eta.Text = EtaDefault.ToString(CultureInfo.InvariantCulture);
 			desiredError.Text = DesiredErrorDefault.ToString(CultureInfo.InvariantCulture);
 		}
 
-		public static void FillChart(Chart graph, Label totalError, NeuralNetwork ann)
-		{
-			string name = "SymbolError";
-			graph.Series[name].Points.Clear();
-			graph.ChartAreas[0].AxisY.Maximum = Math.Abs(ann.TotalError) < double.Epsilon ? 1 : ann.TotalError;
 
-			for (int i = 0; i < ann._instance.NumSamples; i++)
+		private static void InitPanel(ILPanel panel, NeuralNetwork ann)
+		{
+			panel.Scene.Remove(panel.Scene.First<ILPlotCube>());
+			int xmin = (int)ann.Instance.Samples[0].Variables[0];
+			int xmax = (int)ann.Instance.Samples[ann.Instance.NumSamples - 1].Variables[0];
+			int ymin = (int)ann.Instance.Samples[0].Variables[1];
+			int ymax = (int)ann.Instance.Samples[ann.Instance.NumSamples - 1].Variables[0];
+			
+			ILArray<double> positions = ILMath.zeros<double>(3, ann.Instance.NumSamples);
+
+			int index = 0;
+			foreach (var sample in ann.Instance.Samples)
 			{
-				graph.Series[name].Points.AddXY(i + 1, ann._perSymbolError[i]);
+				positions[0, index] = sample.Variables[0];
+				positions[1, index] = sample.Variables[1];
+				positions[2, index] = sample.Value;
+				index++;
 			}
-			graph.Update();
+
+			ILPlotCube cube = new ILPlotCube(twoDMode: false)
+			{
+				// rotate plot cube
+				Rotation = Matrix4.Rotation(new Vector3(-1, 1, .1f), 0.4f),
+				// perspective projection
+				Projection = Projection.Perspective,
+				Children =
+				{
+					new ILSurface((x, y) => 0,
+						xmin, xmax, 50,
+						ymin, ymax, 50,
+						(x,y) => x * y,
+						colormap: Colormaps.Autumn) {
+						UseLighting = true
+					},
+					new ILSurface((x, y) => (float)Convert(ann.Instance.OriginalFunction.ValueAt, x, y),
+						xmin, xmax, 50,
+						ymin, ymax, 50,
+						(x, y) => x * y,
+						colormap: Colormaps.Hsv)
+					{
+						UseLighting = true
+					},
+					// add line plot, provide data as rows 
+					new ILPoints {
+						Positions = ILMath.tosingle(positions),
+						Color = Color.Red
+					}
+				}
+			};
+			panel.Scene.Add(cube);
+			panel.Scene.First<ILPlotCube>().Rotation = Matrix4.Rotation(Vector3.UnitX, .8f) * Matrix4.Rotation(Vector3.UnitZ, .6f);
+			panel.Refresh();
+		}
+		
+		public static void UpdateInfo(ILPanel panel, Label totalError, NeuralNetwork ann)
+		{
+			DrawFunctions(panel, ann);
 			totalError.Text = ann.TotalError.ToString(CultureInfo.InvariantCulture);
 			totalError.Update();
 		}
 
-		public static void FillPanel(TableLayoutPanel panel, NeuralNetwork ann)
+		private static void DrawFunctions(ILPanel panel, NeuralNetwork ann)
 		{
-			int rowCount = 1;
-			int columnCount = ann.NumberOfLayers;
-			panel.ColumnCount = columnCount;
-			panel.RowCount = rowCount;
-
-			panel.ColumnStyles.Clear();
-			panel.RowStyles.Clear();
-			panel.Controls.Clear();
-
-			for (var i = 0; i < columnCount; i++)
-			{
-				panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / columnCount));
-			}
-			for (var i = 0; i < rowCount; i++)
-			{
-				panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / rowCount));
-			}
-
-			Label input = new Label
-			{
-				Text = ann._architecture[0].ToString(),
-				AutoSize = false,
-				TextAlign = ContentAlignment.MiddleCenter,
-				Dock = DockStyle.Fill
-			};
-			panel.Controls.Add(input);
-
+			int xmin = (int)ann.Instance.Samples[0].Variables[0];
+			int xmax = (int)ann.Instance.Samples[ann.Instance.NumSamples - 1].Variables[0];
+			int ymin = (int)ann.Instance.Samples[0].Variables[1];
+			int ymax = (int)ann.Instance.Samples[ann.Instance.NumSamples - 1].Variables[0];
 			
-			for (int i = 1; i < ann.NumberOfLayers - 1; i++)
-			{
-				TextBox box = new TextBox
-				{
-					Text = ann._architecture[i].ToString(),
-					Name = $"t_{i}",
-					Dock = DockStyle.Fill
-				};
-				panel.Controls.Add(box);
-
-			}
-			
-			Label output = new Label
-			{
-				Text = ann._architecture[ann.NumberOfLayers - 1].ToString(),
-				AutoSize = false,
-				TextAlign = ContentAlignment.MiddleCenter,
-				Dock = DockStyle.Fill
+			var approximatedFunction = new ILSurface((x, y) => (float)Convert(ann.GetOutput, x, y)[0],
+				xmin, xmax, 50,
+				ymin, ymax, 50,
+				(x,y) => x * y,
+				colormap: Colormaps.Autumn) {
+				UseLighting = true
 			};
-			panel.Controls.Add(output);
+			panel.Scene.Remove(panel.Scene.First<ILSurface>());
+			panel.Scene.First<ILPlotCubeDataGroup>().Insert(0, approximatedFunction);
+			panel.Refresh();
 		}
 
 		public static void FillTypeChoices(ComboBox box)
@@ -435,67 +416,6 @@ namespace ANFIS.ANN
 			box.Items.Add(BackpropagationHandler.ToString(BackpropagationType.Batch));
 			box.Items.Add(BackpropagationHandler.ToString(BackpropagationType.Online));
 			box.SelectedItem = box.Items[0];
-		}
-
-		public static int WhichClass(double[] solution)
-		{
-			int whichClass = 0;
-			double max = 0;
-			for (int i = 0; i < solution.Length; i++)
-			{
-				if (!(solution[i] > max)) continue;
-				max = solution[i];
-				whichClass = i;
-			}
-			return whichClass;
-		}
-
-		public static void SetClasses(TableLayoutPanel panel, double[] results)
-		{
-			int columnCount = results.Length > 4 ? 5 : results.Length;
-			int rowCount = (results.Length - 1) / 5 + 1;
-
-			panel.ColumnCount = columnCount;
-			panel.RowCount = rowCount;
-
-			panel.ColumnStyles.Clear();
-			panel.RowStyles.Clear();
-			panel.Controls.Clear();
-
-			for (var i = 0; i < columnCount; i++)
-			{
-				panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / columnCount));
-			}
-			for (var i = 0; i < rowCount; i++)
-			{
-				panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / rowCount));
-			}
-
-			for (var i = 0; i < results.Length; i++)
-			{
-				var label = new Label
-				{
-					Text = @"Class " + (i + 1) + @": " + results[i].ToString("0.0000"),
-					Name = $"c_{i + 1}",
-					AutoSize = false,
-					TextAlign = ContentAlignment.MiddleCenter,
-					Dock = DockStyle.Fill
-				};
-				
-				panel.Controls.Add(label);
-			}
-		}
-
-		public static int WhichClass(int[] classes)
-		{
-			int whichClass = -1;
-			for (int i = 0; i < classes.Length; i++)
-			{
-				if (classes[i] != 1) continue;
-				whichClass = i;
-				break;
-			}
-			return whichClass;
 		}
 	}
 }

@@ -50,7 +50,10 @@ namespace ANFIS.Handlers.IO
 			IEnumerator<string> iter = Directory.EnumerateFiles(_folder).GetEnumerator();
 			while (iter.MoveNext())
 			{
-				retList.Add(Path.GetFileNameWithoutExtension(iter.Current));
+				if(iter.Current != null && Path.GetExtension(iter.Current).Equals(Extension))
+				{
+					retList.Add(Path.GetFileNameWithoutExtension(iter.Current));
+				}
 			}
 			iter.Dispose();
 			return retList;

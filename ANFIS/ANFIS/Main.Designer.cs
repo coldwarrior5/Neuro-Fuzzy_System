@@ -30,9 +30,7 @@ namespace ANFIS
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-			System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-			System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
 			this.progressionPanel = new System.Windows.Forms.FlowLayoutPanel();
 			this.panelIcon = new System.Windows.Forms.Panel();
 			this.buttonTrainSet = new System.Windows.Forms.Button();
@@ -53,32 +51,27 @@ namespace ANFIS
 			this.separator = new System.Windows.Forms.Label();
 			this.buttonCreateTrainSet = new System.Windows.Forms.Button();
 			this.panelTrain = new System.Windows.Forms.Panel();
+			this.ilPanelFunctions = new ILNumerics.Drawing.ILPanel();
+			this.textBoxRules = new System.Windows.Forms.TextBox();
+			this.labelRules = new System.Windows.Forms.Label();
 			this.labelTotalError = new System.Windows.Forms.Label();
 			this.labelTotalErrorStatic = new System.Windows.Forms.Label();
-			this.buttonRemoveLayer = new System.Windows.Forms.Button();
-			this.layoutArchitexture = new System.Windows.Forms.TableLayoutPanel();
 			this.textBoxDesiredError = new System.Windows.Forms.TextBox();
 			this.textBoxEta = new System.Windows.Forms.TextBox();
 			this.comboBoxType = new System.Windows.Forms.ComboBox();
 			this.labelDesiredError = new System.Windows.Forms.Label();
 			this.labelEta = new System.Windows.Forms.Label();
 			this.labelType = new System.Windows.Forms.Label();
-			this.buttonAddLayer = new System.Windows.Forms.Button();
-			this.labelArchitecture = new System.Windows.Forms.Label();
-			this.errorChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
 			this.Train = new System.Windows.Forms.Button();
-			this.GoToTest = new System.Windows.Forms.Button();
+			this.GoToResults = new System.Windows.Forms.Button();
 			this.panelResult = new System.Windows.Forms.Panel();
-			this.resultClasses = new System.Windows.Forms.TableLayoutPanel();
-			this.labelClass = new System.Windows.Forms.Label();
-			this.labelClassStatic = new System.Windows.Forms.Label();
-			this.Test = new System.Windows.Forms.Button();
+			this.buttonSaveResult = new System.Windows.Forms.Button();
+			this.ilPanelResults = new ILNumerics.Drawing.ILPanel();
 			this.progressionPanel.SuspendLayout();
 			this.titleBar.SuspendLayout();
 			this.panelTrainSet.SuspendLayout();
 			this.panelFunction.SuspendLayout();
 			this.panelTrain.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.errorChart)).BeginInit();
 			this.panelResult.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -307,21 +300,19 @@ namespace ANFIS
 			// 
 			// panelTrain
 			// 
+			this.panelTrain.Controls.Add(this.ilPanelFunctions);
+			this.panelTrain.Controls.Add(this.textBoxRules);
+			this.panelTrain.Controls.Add(this.labelRules);
 			this.panelTrain.Controls.Add(this.labelTotalError);
 			this.panelTrain.Controls.Add(this.labelTotalErrorStatic);
-			this.panelTrain.Controls.Add(this.buttonRemoveLayer);
-			this.panelTrain.Controls.Add(this.layoutArchitexture);
 			this.panelTrain.Controls.Add(this.textBoxDesiredError);
 			this.panelTrain.Controls.Add(this.textBoxEta);
 			this.panelTrain.Controls.Add(this.comboBoxType);
 			this.panelTrain.Controls.Add(this.labelDesiredError);
 			this.panelTrain.Controls.Add(this.labelEta);
 			this.panelTrain.Controls.Add(this.labelType);
-			this.panelTrain.Controls.Add(this.buttonAddLayer);
-			this.panelTrain.Controls.Add(this.labelArchitecture);
-			this.panelTrain.Controls.Add(this.errorChart);
 			this.panelTrain.Controls.Add(this.Train);
-			this.panelTrain.Controls.Add(this.GoToTest);
+			this.panelTrain.Controls.Add(this.GoToResults);
 			this.panelTrain.Location = new System.Drawing.Point(175, 38);
 			this.panelTrain.Name = "panelTrain";
 			this.panelTrain.Size = new System.Drawing.Size(625, 562);
@@ -329,51 +320,58 @@ namespace ANFIS
 			this.panelTrain.Visible = false;
 			this.panelTrain.VisibleChanged += new System.EventHandler(this.TrainPanel_Visible);
 			// 
+			// ilPanelFunctions
+			// 
+			this.ilPanelFunctions.Driver = ILNumerics.Drawing.RendererTypes.OpenGL;
+			this.ilPanelFunctions.Editor = null;
+			this.ilPanelFunctions.Location = new System.Drawing.Point(105, 0);
+			this.ilPanelFunctions.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.ilPanelFunctions.Name = "ilPanelFunctions";
+			this.ilPanelFunctions.Rectangle = ((System.Drawing.RectangleF)(resources.GetObject("ilPanelFunctions.Rectangle")));
+			this.ilPanelFunctions.ShowUIControls = false;
+			this.ilPanelFunctions.Size = new System.Drawing.Size(466, 275);
+			this.ilPanelFunctions.TabIndex = 19;
+			this.ilPanelFunctions.Timeout = ((uint)(0u));
+			// 
+			// textBoxRules
+			// 
+			this.textBoxRules.Location = new System.Drawing.Point(214, 317);
+			this.textBoxRules.Name = "textBoxRules";
+			this.textBoxRules.Size = new System.Drawing.Size(208, 27);
+			this.textBoxRules.TabIndex = 18;
+			this.textBoxRules.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Rules_Changed);
+			this.textBoxRules.Leave += new System.EventHandler(this.Rules_Left);
+			// 
+			// labelRules
+			// 
+			this.labelRules.AutoSize = true;
+			this.labelRules.Location = new System.Drawing.Point(10, 317);
+			this.labelRules.Name = "labelRules";
+			this.labelRules.Size = new System.Drawing.Size(134, 21);
+			this.labelRules.TabIndex = 17;
+			this.labelRules.Text = "Number of rules:";
+			// 
 			// labelTotalError
 			// 
 			this.labelTotalError.AutoSize = true;
-			this.labelTotalError.Location = new System.Drawing.Point(319, 200);
+			this.labelTotalError.Location = new System.Drawing.Point(299, 285);
 			this.labelTotalError.Name = "labelTotalError";
-			this.labelTotalError.Size = new System.Drawing.Size(0, 21);
+			this.labelTotalError.Size = new System.Drawing.Size(19, 21);
 			this.labelTotalError.TabIndex = 16;
+			this.labelTotalError.Text = "0";
 			// 
 			// labelTotalErrorStatic
 			// 
 			this.labelTotalErrorStatic.AutoSize = true;
-			this.labelTotalErrorStatic.Location = new System.Drawing.Point(220, 200);
+			this.labelTotalErrorStatic.Location = new System.Drawing.Point(210, 285);
 			this.labelTotalErrorStatic.Name = "labelTotalErrorStatic";
 			this.labelTotalErrorStatic.Size = new System.Drawing.Size(92, 21);
 			this.labelTotalErrorStatic.TabIndex = 15;
 			this.labelTotalErrorStatic.Text = "Total error:";
 			// 
-			// buttonRemoveLayer
-			// 
-			this.buttonRemoveLayer.Enabled = false;
-			this.buttonRemoveLayer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.buttonRemoveLayer.Location = new System.Drawing.Point(157, 276);
-			this.buttonRemoveLayer.Name = "buttonRemoveLayer";
-			this.buttonRemoveLayer.Size = new System.Drawing.Size(155, 29);
-			this.buttonRemoveLayer.TabIndex = 14;
-			this.buttonRemoveLayer.Text = "Remove layer";
-			this.buttonRemoveLayer.UseVisualStyleBackColor = true;
-			this.buttonRemoveLayer.Click += new System.EventHandler(this.ButtonRemoveLayer_Click);
-			// 
-			// layoutArchitexture
-			// 
-			this.layoutArchitexture.ColumnCount = 2;
-			this.layoutArchitexture.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.layoutArchitexture.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.layoutArchitexture.Location = new System.Drawing.Point(157, 236);
-			this.layoutArchitexture.Name = "layoutArchitexture";
-			this.layoutArchitexture.RowCount = 2;
-			this.layoutArchitexture.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.layoutArchitexture.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.layoutArchitexture.Size = new System.Drawing.Size(456, 29);
-			this.layoutArchitexture.TabIndex = 13;
-			// 
 			// textBoxDesiredError
 			// 
-			this.textBoxDesiredError.Location = new System.Drawing.Point(215, 399);
+			this.textBoxDesiredError.Location = new System.Drawing.Point(214, 418);
 			this.textBoxDesiredError.Name = "textBoxDesiredError";
 			this.textBoxDesiredError.Size = new System.Drawing.Size(208, 27);
 			this.textBoxDesiredError.TabIndex = 12;
@@ -382,7 +380,7 @@ namespace ANFIS
 			// 
 			// textBoxEta
 			// 
-			this.textBoxEta.Location = new System.Drawing.Point(215, 363);
+			this.textBoxEta.Location = new System.Drawing.Point(214, 385);
 			this.textBoxEta.Name = "textBoxEta";
 			this.textBoxEta.Size = new System.Drawing.Size(208, 27);
 			this.textBoxEta.TabIndex = 11;
@@ -393,7 +391,7 @@ namespace ANFIS
 			// 
 			this.comboBoxType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBoxType.FormattingEnabled = true;
-			this.comboBoxType.Location = new System.Drawing.Point(215, 325);
+			this.comboBoxType.Location = new System.Drawing.Point(214, 350);
 			this.comboBoxType.Name = "comboBoxType";
 			this.comboBoxType.Size = new System.Drawing.Size(208, 29);
 			this.comboBoxType.TabIndex = 10;
@@ -402,7 +400,7 @@ namespace ANFIS
 			// labelDesiredError
 			// 
 			this.labelDesiredError.AutoSize = true;
-			this.labelDesiredError.Location = new System.Drawing.Point(10, 405);
+			this.labelDesiredError.Location = new System.Drawing.Point(10, 418);
 			this.labelDesiredError.Name = "labelDesiredError";
 			this.labelDesiredError.Size = new System.Drawing.Size(110, 21);
 			this.labelDesiredError.TabIndex = 9;
@@ -411,7 +409,7 @@ namespace ANFIS
 			// labelEta
 			// 
 			this.labelEta.AutoSize = true;
-			this.labelEta.Location = new System.Drawing.Point(10, 369);
+			this.labelEta.Location = new System.Drawing.Point(10, 385);
 			this.labelEta.Name = "labelEta";
 			this.labelEta.Size = new System.Drawing.Size(118, 21);
 			this.labelEta.TabIndex = 8;
@@ -420,49 +418,11 @@ namespace ANFIS
 			// labelType
 			// 
 			this.labelType.AutoSize = true;
-			this.labelType.Location = new System.Drawing.Point(10, 333);
+			this.labelType.Location = new System.Drawing.Point(10, 350);
 			this.labelType.Name = "labelType";
 			this.labelType.Size = new System.Drawing.Size(192, 21);
 			this.labelType.TabIndex = 7;
 			this.labelType.Text = "Backpropagation type:";
-			// 
-			// buttonAddLayer
-			// 
-			this.buttonAddLayer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.buttonAddLayer.Location = new System.Drawing.Point(328, 276);
-			this.buttonAddLayer.Name = "buttonAddLayer";
-			this.buttonAddLayer.Size = new System.Drawing.Size(155, 29);
-			this.buttonAddLayer.TabIndex = 6;
-			this.buttonAddLayer.Text = "Add layer";
-			this.buttonAddLayer.UseVisualStyleBackColor = true;
-			this.buttonAddLayer.Click += new System.EventHandler(this.ButtonAddLayer_Click);
-			// 
-			// labelArchitecture
-			// 
-			this.labelArchitecture.AutoSize = true;
-			this.labelArchitecture.Location = new System.Drawing.Point(10, 244);
-			this.labelArchitecture.Name = "labelArchitecture";
-			this.labelArchitecture.Size = new System.Drawing.Size(151, 21);
-			this.labelArchitecture.TabIndex = 4;
-			this.labelArchitecture.Text = "ANN architexture:";
-			// 
-			// errorChart
-			// 
-			chartArea2.Name = "ChartArea1";
-			this.errorChart.ChartAreas.Add(chartArea2);
-			this.errorChart.Location = new System.Drawing.Point(114, 0);
-			this.errorChart.Name = "errorChart";
-			this.errorChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Pastel;
-			series2.ChartArea = "ChartArea1";
-			series2.Name = "SymbolError";
-			this.errorChart.Series.Add(series2);
-			this.errorChart.Size = new System.Drawing.Size(411, 194);
-			this.errorChart.TabIndex = 3;
-			this.errorChart.Text = "Per character error";
-			title2.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Bottom;
-			title2.Name = "Title1";
-			title2.Text = "Per character error";
-			this.errorChart.Titles.Add(title2);
 			// 
 			// Train
 			// 
@@ -475,24 +435,22 @@ namespace ANFIS
 			this.Train.UseVisualStyleBackColor = true;
 			this.Train.Click += new System.EventHandler(this.Train_Click);
 			// 
-			// GoToTest
+			// GoToResults
 			// 
-			this.GoToTest.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.GoToTest.Location = new System.Drawing.Point(214, 460);
-			this.GoToTest.Name = "GoToTest";
-			this.GoToTest.Size = new System.Drawing.Size(207, 48);
-			this.GoToTest.TabIndex = 2;
-			this.GoToTest.Text = "Test neural network";
-			this.GoToTest.UseVisualStyleBackColor = true;
-			this.GoToTest.Visible = false;
-			this.GoToTest.Click += new System.EventHandler(this.GoToTest_Click);
+			this.GoToResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.GoToResults.Location = new System.Drawing.Point(214, 460);
+			this.GoToResults.Name = "GoToResults";
+			this.GoToResults.Size = new System.Drawing.Size(207, 48);
+			this.GoToResults.TabIndex = 2;
+			this.GoToResults.Text = "See results";
+			this.GoToResults.UseVisualStyleBackColor = true;
+			this.GoToResults.Visible = false;
+			this.GoToResults.Click += new System.EventHandler(this.GoToTest_Click);
 			// 
 			// panelResult
 			// 
-			this.panelResult.Controls.Add(this.resultClasses);
-			this.panelResult.Controls.Add(this.labelClass);
-			this.panelResult.Controls.Add(this.labelClassStatic);
-			this.panelResult.Controls.Add(this.Test);
+			this.panelResult.Controls.Add(this.ilPanelResults);
+			this.panelResult.Controls.Add(this.buttonSaveResult);
 			this.panelResult.Location = new System.Drawing.Point(175, 38);
 			this.panelResult.Name = "panelResult";
 			this.panelResult.Size = new System.Drawing.Size(625, 562);
@@ -500,56 +458,38 @@ namespace ANFIS
 			this.panelResult.Visible = false;
 			this.panelResult.VisibleChanged += new System.EventHandler(this.TestPanel_Visible);
 			// 
-			// resultClasses
+			// buttonSaveResult
 			// 
-			this.resultClasses.ColumnCount = 2;
-			this.resultClasses.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.resultClasses.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.resultClasses.Location = new System.Drawing.Point(125, 266);
-			this.resultClasses.Name = "resultClasses";
-			this.resultClasses.RowCount = 2;
-			this.resultClasses.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.resultClasses.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-			this.resultClasses.Size = new System.Drawing.Size(400, 67);
-			this.resultClasses.TabIndex = 6;
+			this.buttonSaveResult.Enabled = false;
+			this.buttonSaveResult.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonSaveResult.Location = new System.Drawing.Point(214, 460);
+			this.buttonSaveResult.Name = "buttonSaveResult";
+			this.buttonSaveResult.Size = new System.Drawing.Size(207, 48);
+			this.buttonSaveResult.TabIndex = 0;
+			this.buttonSaveResult.Text = "Save result";
+			this.buttonSaveResult.UseVisualStyleBackColor = true;
+			this.buttonSaveResult.Click += new System.EventHandler(this.Test_Click);
 			// 
-			// labelClass
+			// ilPanelResults
 			// 
-			this.labelClass.AutoSize = true;
-			this.labelClass.Location = new System.Drawing.Point(270, 377);
-			this.labelClass.Name = "labelClass";
-			this.labelClass.Size = new System.Drawing.Size(0, 21);
-			this.labelClass.TabIndex = 5;
-			// 
-			// labelClassStatic
-			// 
-			this.labelClassStatic.AutoSize = true;
-			this.labelClassStatic.Location = new System.Drawing.Point(211, 377);
-			this.labelClassStatic.Name = "labelClassStatic";
-			this.labelClassStatic.Size = new System.Drawing.Size(53, 21);
-			this.labelClassStatic.TabIndex = 4;
-			this.labelClassStatic.Text = "Class:";
-			// 
-			// Test
-			// 
-			this.Test.Enabled = false;
-			this.Test.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.Test.Location = new System.Drawing.Point(214, 460);
-			this.Test.Name = "Test";
-			this.Test.Size = new System.Drawing.Size(207, 48);
-			this.Test.TabIndex = 0;
-			this.Test.Text = "Test character";
-			this.Test.UseVisualStyleBackColor = true;
-			this.Test.Click += new System.EventHandler(this.Test_Click);
+			this.ilPanelResults.Driver = ILNumerics.Drawing.RendererTypes.OpenGL;
+			this.ilPanelResults.Editor = null;
+			this.ilPanelResults.Location = new System.Drawing.Point(47, 4);
+			this.ilPanelResults.Name = "ilPanelResults";
+			this.ilPanelResults.Rectangle = ((System.Drawing.RectangleF)(resources.GetObject("ilPanelResults.Rectangle")));
+			this.ilPanelResults.ShowUIControls = false;
+			this.ilPanelResults.Size = new System.Drawing.Size(539, 441);
+			this.ilPanelResults.TabIndex = 1;
+			this.ilPanelResults.Timeout = ((uint)(0u));
 			// 
 			// Main
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(44)))), ((int)(((byte)(51)))));
 			this.ClientSize = new System.Drawing.Size(800, 600);
+			this.Controls.Add(this.panelResult);
 			this.Controls.Add(this.panelTrainSet);
 			this.Controls.Add(this.panelTrain);
-			this.Controls.Add(this.panelResult);
 			this.Controls.Add(this.panelSlider);
 			this.Controls.Add(this.titleBar);
 			this.Controls.Add(this.progressionPanel);
@@ -568,9 +508,7 @@ namespace ANFIS
 			this.panelFunction.PerformLayout();
 			this.panelTrain.ResumeLayout(false);
 			this.panelTrain.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.errorChart)).EndInit();
 			this.panelResult.ResumeLayout(false);
-			this.panelResult.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -590,33 +528,29 @@ namespace ANFIS
 		private Button Train;
 		private Panel panelResult;
 		private Button buttonCreateTrainSet;
-		private Button GoToTest;
-		private Button Test;
+		private Button GoToResults;
+		private Button buttonSaveResult;
 		private Label labelOr;
 		private Label separator;
 		private Button buttonLoadTrainSet;
 		private ComboBox loadTrainSet;
 		private Label labelLoadTrainSet;
-		private Label labelClass;
-		private Label labelClassStatic;
-		private System.Windows.Forms.DataVisualization.Charting.Chart errorChart;
 		private TextBox textBoxDesiredError;
 		private TextBox textBoxEta;
 		private ComboBox comboBoxType;
 		private Label labelDesiredError;
 		private Label labelEta;
 		private Label labelType;
-		private Button buttonAddLayer;
-		private Label labelArchitecture;
-		private TableLayoutPanel layoutArchitexture;
-		private Button buttonRemoveLayer;
 		private Label labelTotalError;
 		private Label labelTotalErrorStatic;
-		private TableLayoutPanel resultClasses;
 		private Panel panelFunction;
 		private Label labelFunction;
 		private Button buttonFunction;
 		private ComboBox comboBoxFunction;
+		private TextBox textBoxRules;
+		private Label labelRules;
+		private ILNumerics.Drawing.ILPanel ilPanelFunctions;
+		private ILNumerics.Drawing.ILPanel ilPanelResults;
 	}
 }
 

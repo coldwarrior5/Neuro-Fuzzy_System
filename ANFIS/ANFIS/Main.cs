@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.Windows.Forms;
 using ANFIS.ANN;
 using ANFIS.Handlers.Error;
@@ -42,23 +41,8 @@ namespace ANFIS
 
 		private void SetNeuralNetwork()
 		{
-			if(_ann is null)
+			if(_ann is null || !_ann.Instance.Equals(_instance))
 				_ann = new NeuralNetwork(_instance);
-			else if(!_ann.Consistent())
-				_ann = new NeuralNetwork(_instance);
-		}
-
-		private void SetTexts()
-		{
-			for (int i = 0; i < layoutArchitexture.Controls.Count; i++)
-			{
-				if (layoutArchitexture.Controls[i] is TextBox)
-				{
-					layoutArchitexture.Controls[i].KeyDown += LayerNumber_Changed;
-					layoutArchitexture.Controls[i].Leave += LayerNumber_Left;
-				}
-					
-			}
 		}
 		// ______________________________________________________________
 
@@ -154,63 +138,17 @@ namespace ANFIS
 			if (!(sender is Panel panel)) return;
 			if (!panel.Visible) return;
 			SetNeuralNetwork();
-			NeuralNetwork.FillTrainChoices(errorChart, labelTotalError, layoutArchitexture, comboBoxType, textBoxEta, textBoxDesiredError, _ann);
-			SetTexts();
+			NeuralNetwork.FillTrainChoices(ilPanelFunctions, labelTotalError, textBoxRules, comboBoxType, textBoxEta, textBoxDesiredError, _ann);
 		}
 
-		private void LayerNumber_Changed(object sender, KeyEventArgs e)
+		private void Rules_Changed(object sender, KeyEventArgs e)
 		{
-			if (!(sender is TextBox t)) return;
-
-			switch (e.KeyCode)
-			{
-				case Keys.Enter:
-					var splits = t.Name.Split('_');
-					int.TryParse(splits[1], out int whichLayer);
-					int.TryParse(t.Text, out int howMany);
-					howMany = MathHandler.Clamp(howMany, NeuralNetwork.NeuronMin, NeuralNetwork.NeuronMax);
-					t.Text = howMany.ToString();
-					_ann.UpdateLayer(whichLayer, howMany);
-					break;
-				case Keys.Escape:
-					splits = t.Name.Split('_');
-					int.TryParse(splits[1], out whichLayer);
-					t.Text = _ann.GetArchitecture()[whichLayer].ToString();
-					break;
-			}
-			
+			_ann.NumberOfRules = UiHandler.TextBoxChanged(sender, e, _ann.NumberOfRules, NeuralNetwork.RulesMin, NeuralNetwork.RulesMax);
 		}
 
-		private void LayerNumber_Left(object sender, EventArgs e)
+		private void Rules_Left(object sender, EventArgs e)
 		{
-			if (!(sender is TextBox t)) return;
-			
-			var splits = t.Name.Split('_');
-			int.TryParse(splits[1], out int whichLayer);
-			int.TryParse(t.Text, out int howMany);
-			howMany = MathHandler.Clamp(howMany, NeuralNetwork.NeuronMin, NeuralNetwork.NeuronMax);
-			t.Text = howMany.ToString();
-			_ann.UpdateLayer(whichLayer, howMany);
-		}
-
-		private void ButtonRemoveLayer_Click(object sender, EventArgs e)
-		{
-			buttonAddLayer.Enabled = true;
-			_ann.RemoveLayer();
-			NeuralNetwork.FillPanel(layoutArchitexture, _ann);
-			SetTexts();
-			if (_ann.GetArchitecture().Count == NeuralNetwork.LayersMin)
-				buttonRemoveLayer.Enabled = false;
-		}
-
-		private void ButtonAddLayer_Click(object sender, EventArgs e)
-		{
-			buttonRemoveLayer.Enabled = true;
-			_ann.AddLayer();
-			NeuralNetwork.FillPanel(layoutArchitexture, _ann);
-			SetTexts();
-			if (_ann.GetArchitecture().Count == NeuralNetwork.LayersMax)
-				buttonAddLayer.Enabled = false;
+			_ann.NumberOfRules = UiHandler.TextBoxLeft(sender, e, _ann.NumberOfRules, NeuralNetwork.RulesMin, NeuralNetwork.RulesMax);
 		}
 
 		private void OnValueChanged_Type(object sender, EventArgs e)
@@ -220,74 +158,36 @@ namespace ANFIS
 
 		private void Eta_Changed(object sender, KeyEventArgs e)
 		{
-			if (!(sender is TextBox t)) return;
-
-			switch (e.KeyCode)
-			{
-				case Keys.Enter:
-					double.TryParse(t.Text, out double eta);
-					eta = MathHandler.Clamp(eta, NeuralNetwork.EtaMin, NeuralNetwork.EtaMax);
-					t.Text = eta.ToString(CultureInfo.InvariantCulture);
-					_ann.ChangeEta(eta);
-					break;
-				case Keys.Escape:
-					t.Text = _ann.GetEta().ToString(CultureInfo.InvariantCulture);
-					break;
-			}
+			_ann.Eta = UiHandler.TextBoxChanged(sender, e, _ann.Eta, NeuralNetwork.EtaMin, NeuralNetwork.EtaMax);
 		}
 
 		private void Eta_Left(object sender, EventArgs e)
 		{
-			if (!(sender is TextBox t)) return;
-			
-			double.TryParse(t.Text, out double eta);
-			eta = MathHandler.Clamp(eta, NeuralNetwork.EtaMin, NeuralNetwork.EtaMax);
-			t.Text = eta.ToString(CultureInfo.InvariantCulture);
-			_ann.ChangeEta(eta);
+			_ann.Eta = UiHandler.TextBoxLeft(sender, e, _ann.Eta, NeuralNetwork.EtaMin, NeuralNetwork.EtaMax);
 		}
 
 		private void DesiredError_Changed(object sender, KeyEventArgs e)
 		{
-			if (!(sender is TextBox t)) return;
-
-			switch(e.KeyCode)
-			{
-				case Keys.Enter:
-					double.TryParse(t.Text, out double desiredError);
-					desiredError = MathHandler.Clamp(desiredError, NeuralNetwork.DesiredErrorMin, NeuralNetwork.DesiredErrorMax);
-					t.Text = desiredError.ToString(CultureInfo.InvariantCulture);
-					_ann.ChangeDesiredError(desiredError);
-					break;
-				case Keys.Escape:
-					t.Text = _ann.GetDesiredError().ToString(CultureInfo.InvariantCulture);
-					break;
-			}
+			_ann.DesiredError = UiHandler.TextBoxChanged(sender, e, _ann.DesiredError, NeuralNetwork.DesiredErrorMin, NeuralNetwork.DesiredErrorMax);
 		}
 
 		private void DesiredError_Left(object sender, EventArgs e)
 		{
-			if (!(sender is TextBox t)) return;
-
-			double.TryParse(t.Text, out double desiredError);
-			desiredError = MathHandler.Clamp(desiredError, NeuralNetwork.DesiredErrorMin, NeuralNetwork.DesiredErrorMax);
-			t.Text = desiredError.ToString(CultureInfo.InvariantCulture);
-			_ann.ChangeDesiredError(desiredError);
+			_ann.DesiredError = UiHandler.TextBoxLeft(sender, e, _ann.DesiredError, NeuralNetwork.DesiredErrorMin, NeuralNetwork.DesiredErrorMax);
 		}
 
 		private void Train_Click(object sender, EventArgs e)
 		{
 			Train.Visible = false;
-			GoToTest.Visible = true;
-			_ann.Train(errorChart, labelTotalError, GoToTest);
-			NeuralNetwork.FillChart(errorChart, labelTotalError, _ann);
+			GoToResults.Visible = true;
+			_ann.Train(ilPanelFunctions, labelTotalError, GoToResults);
 		}
 
 		private void GoToTest_Click(object sender, EventArgs e)
 		{
 			Train.Visible = true;
-			GoToTest.Visible = false;
-			GoToTest.Enabled = false;
-			_ann.FixArchitecture();
+			GoToResults.Visible = false;
+			GoToResults.Enabled = false;
 			UiHandler.PanelVisible(panelResult, _panels);
 			buttonResult.Enabled = true;
 			UiHandler.SetSlider(panelSlider, buttonResult.Top, buttonResult.Height);
@@ -295,10 +195,9 @@ namespace ANFIS
 
 		private void ButtonTrain_Click(object sender, EventArgs e)
 		{
-			_ann?.ResetNetwork();
 			_ann?.ResetTraining();
 			Train.Visible = true;
-			GoToTest.Visible = false;
+			GoToResults.Visible = false;
 			UiHandler.SetSlider(panelSlider, buttonTrain.Top, buttonTrain.Height);
 			buttonResult.Enabled = false;
 			UiHandler.PanelVisible(panelTrain, _panels);
@@ -311,11 +210,7 @@ namespace ANFIS
 		private void TestPanel_Visible(object sender, EventArgs e)
 		{
 			if (!(sender is Panel panel)) return;
-			if (!panel.Visible)
-			{
-				return;
-			}
-			labelClass.Text = "";
+			if (!panel.Visible) return;
 		}
 
 		private void Test_Click(object sender, EventArgs e)
@@ -325,11 +220,10 @@ namespace ANFIS
 
 		private void ButtonTest_Click(object sender, EventArgs e)
 		{
-			Test.Enabled = false;
+			buttonSaveResult.Enabled = false;
 			UiHandler.SetSlider(panelSlider, buttonResult.Top, buttonResult.Height);
 			UiHandler.PanelVisible(panelResult, _panels);
 		}
-		
 		// ______________________________________________________________
 	}
 }

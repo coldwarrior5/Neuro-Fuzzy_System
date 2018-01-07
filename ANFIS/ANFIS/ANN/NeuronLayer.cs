@@ -1,88 +1,113 @@
 ﻿using System;
 using System.Collections.Generic;
 using ANFIS.ANN.Interfaces;
+using ANFIS.ANN.NeuronClasses;
+using ANFIS.ANN.Structures;
 
 namespace ANFIS.ANN
 {
-	public class NeuronLayer
+	public class NeuronLayer : INeuronLayer
 	{
-		public int NumberOfNeurons { get; }
-		public int InputSize { get; }
-		private Neuron[] _neurons;
+		public LayerInfo Architecture { get; private set; }
+		private readonly int _numberOfVariables;
+		private INeuron[] _neurons;
 
-		public NeuronLayer(int numberOfNeurons, int numberOfNeuronsInPreviousLayer, IActivationFunction function = null)
+		public NeuronLayer(LayerInfo architecture, int numberOfVariables)
 		{
-			NumberOfNeurons = numberOfNeurons;
-			InputSize = numberOfNeuronsInPreviousLayer;
-			InitNeurons(function);
+			Architecture = architecture;
+			_numberOfVariables = numberOfVariables;
+			InitNeuron();
 		}
 
-		private void InitNeurons(IActivationFunction function)
+		private void InitNeuron()
 		{
-			_neurons = new Neuron[NumberOfNeurons];
-			DetermineRightFunction(ref function);
-			for (int i = 0; i < NumberOfNeurons; i++)
-				_neurons[i] = new Neuron(InputSize, function);
-		}
-
-		public void ResetLayer()
-		{
-			for (var i = 0; i < NumberOfNeurons; i++)
-				_neurons[i].Reset();
-		}
-
-		private void DetermineRightFunction(ref IActivationFunction function)
-		{
-			if (function is null)
-				function = new Sigmoid();
-			if (InputSize == 0)
-				function = new Adaline();
-		}
-
-		public double[] GetOutputs(double[] inputs)
-		{
-			if(InputSize == 0 && inputs.Length != NumberOfNeurons)
-				throw new ArgumentException(@"Input needs to contain the amount of elements that corresponds to input layer size!", inputs.ToString());
-			if(InputSize != 0 && inputs.Length != InputSize)
-				throw new ArgumentException(@"Input needs to contain the amount of elements that corresponds to former layer size!", inputs.ToString());
-
-			double[] outputs = new double[NumberOfNeurons];
-			for (int i = 0; i < NumberOfNeurons; i++)
+			_neurons = new INeuron[Architecture.NumberOfNeurons];
+			for (int i = 0; i < Architecture.NumberOfNeurons; i++)
 			{
-				outputs[i] = InputSize == 0 ? _neurons[i].GetOutput(new [] {inputs[i]}) : _neurons[i].GetOutput(inputs);
+				switch (Architecture.Type)
+				{
+					case NeuronType.Input:
+						// Has input size of 1
+						_neurons[i] = new InputNeuron();
+						break;
+					case NeuronType.Multiplication:
+						_neurons[i] = new MultiplicationNeuron(Architecture.InputSize);
+						break;
+					case NeuronType.Normalization:
+						_neurons[i] = new NormalizationNeuron(Architecture.InputSize);
+						break;
+					case NeuronType.Function:
+						// Has input size of 1
+						_neurons[i] = new FunctionNeuron(Architecture.InputSize, _numberOfVariables);
+						break;
+					case NeuronType.Output:
+						_neurons[i] = new OutputNeuron(Architecture.InputSize);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException(nameof(Architecture.Type), Architecture.Type, null);
+				}
+			}
+		}
+
+		public double[] GetOutputs(double[] inputs, double[] variables)
+		{
+			if (_neurons is null)
+				return null;
+			double[] outputs = new double[Architecture.NumberOfNeurons];
+			int rules = Architecture.NumberOfNeurons / variables.Length;
+			for (int i = 0; i < Architecture.NumberOfNeurons; i++)
+			{
+				// If the input size is 1 we need to create new array of 1 element
+				switch (Architecture.Type)
+				{
+					case NeuronType.Input:
+						outputs[i] = _neurons[i].GetOutput( new[] { inputs[i / rules]}, i, variables);
+						break;
+					case NeuronType.Multiplication:
+						double[] input = new double[variables.Length];
+						for (int j = 0; j < variables.Length; j++)
+							input[j] = inputs[j * rules + i];
+						outputs[i] = _neurons[i].GetOutput(input, i, variables);
+						break;
+					case NeuronType.Function:
+						outputs[i] = _neurons[i].GetOutput(new[] { inputs[i] }, i, variables);
+						break;
+					case NeuronType.Normalization:
+					case NeuronType.Output:
+						outputs[i] = _neurons[i].GetOutput(inputs, i, variables);
+						break;
+				}
 			}
 			return outputs;
 		}
 
-		public void ApplyChange(List<double> doubles)
+		public void ResetLayer()
 		{
-			for (int i = 0; i < NumberOfNeurons; i++)
+			if (_neurons is null)
+				return;
+			for (var i = 0; i < Architecture.NumberOfNeurons; i++)
+				_neurons[i].ResetWeights();
+		}
+
+		public void UpdateParameters(List<List<double>> correction)
+		{
+			if (_neurons is null)
+				return;
+
+			if (Architecture.Type is NeuronType.Function || Architecture.Type is NeuronType.Input)
 			{
-				_neurons[i].ApplyChange(doubles.GetRange(i * InputSize, InputSize));
+				if (correction.Count != Architecture.NumberOfNeurons)
+					return;
+				for (int i = 0; i < Architecture.NumberOfNeurons; i++)
+				{
+					_neurons[i].UpdateParameters(correction[i]);
+				}
 			}
 		}
 
-		public Neuron[] GetNeurons()
+		public double[] GetParameters(int index)
 		{
-			return _neurons;
-		}
-		
-		// This is for last layer
-		internal void Backpropagation(double[] inputs, double[] outputs, ref double[] deltaLayer, double[] desired, ref List<double> changes)
-		{
-			for (int j = 0; j < NumberOfNeurons; j++)
-			{
-				deltaLayer[j] = _neurons[j].Backpropagation(inputs, outputs, desired, ref changes, j);
-			}
-		}
-
-		// This is for hidden layer
-		internal void Backpropagation(double[] inputs, double[] outputs, ref double[] deltaLayer, double[] deltaNext, Neuron[] neurons, ref List<double> changes)
-		{
-			for (int j = 0; j < NumberOfNeurons; j++)
-			{
-				deltaLayer[j] = _neurons[j].Backpropagation(inputs, outputs, deltaNext, neurons, ref changes, j);
-			}
+			return _neurons[index].GetParameters();
 		}
 	}
 }

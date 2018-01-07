@@ -23,6 +23,7 @@ namespace ANFIS.Handlers.Mathematics
 			}
 			List<Sample> samples = SampleFunction(function, starts, ends);
 			instance = new Instance(samples.Count, numVariables);
+			instance.AddFunction(function.ToString());
 			instance.AddSamples(samples);
 			parser.FormatAndSaveResult(function.Name(), instance);
 		}

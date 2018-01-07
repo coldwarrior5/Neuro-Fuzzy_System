@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using ANFIS.Handlers.Mathematics;
+using ANFIS.Handlers.Mathematics.Interface;
 
 namespace ANFIS.Structures
 {
@@ -9,6 +11,7 @@ namespace ANFIS.Structures
 		public int NumSamples { get; }
 		public int NumVariables { get; }
 		public readonly Sample[] Samples;
+		public IFunction OriginalFunction { get; private set; }
 
 		public Instance(int numSamples, int numVariables)
 		{
@@ -16,6 +19,11 @@ namespace ANFIS.Structures
 			NumSamples = numSamples;
 			NumVariables = numVariables;
 			Samples = new Sample[NumSamples];
+		}
+
+		public void AddFunction(string stringFunction)
+		{
+			OriginalFunction = Functions.GetFunction(stringFunction);
 		}
 
 		public void AddSample(double[] variables, double value)
@@ -35,9 +43,23 @@ namespace ANFIS.Structures
 			}
 		}
 
-		protected bool Equals(Instance other)
+		public override bool Equals(Object obj)
 		{
-			return NumVariables == other.NumVariables && NumSamples == other.NumSamples;
+			if (!(obj is Instance instance)) return false;
+			var other = instance;
+			bool mainCheck = NumVariables == other.NumVariables && NumSamples == other.NumSamples;
+			if (!mainCheck) return false;
+			for (int i = 0; i < NumSamples; i++)
+			{
+				if (Math.Abs(Samples[i].Value - other.Samples[i].Value) > Double.Epsilon)
+					return false;
+				for (int j = 0; j < NumVariables; j++)
+				{
+					if (Math.Abs(Samples[i].Variables[j] - other.Samples[i].Variables[j]) > Double.Epsilon)
+						return false;
+				}
+			}
+			return true;
 		}
 
 		public override int GetHashCode()

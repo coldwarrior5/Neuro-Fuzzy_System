@@ -43,12 +43,64 @@ namespace ANFIS.Handlers.Mathematics
 
 		public override string ToString()
 		{
-			return "((x-1)^2 + (y+2)^2 - 5xy + 3) * cos(x/5)^2";
+			return "((x-1)^2+(y+2)^2-5xy+3)*cos(x/5)^2";
 		}
 
 		public override string Name()
 		{
 			return "FunctionAlpha";
+		}
+	}
+
+	public class SimpleFunction : IAdaptingFunction
+	{
+		private readonly int _numParameters;
+		private readonly double[] _parameters;
+
+		public SimpleFunction(int numParameters)
+		{
+			_numParameters = numParameters;
+			_parameters = new double[numParameters];
+			ResetParameters();
+		}
+
+		public double ValueAt(double[] variables)
+		{
+			if (variables.Length != _numParameters - 1)
+				throw new ArgumentException("This function requires exactly " + (_numParameters - 1) + " input values.");
+
+			double result = 0;
+			for (int i = 0; i < variables.Length; i++)
+				result += _parameters[i] * variables[i];
+			result += _parameters[_numParameters - 1];
+			return result;
+		}
+
+		public double[] GetParameters()
+		{
+			return (double[])_parameters.Clone();
+		}
+
+		public void UpdateParameters(double[] correction)
+		{
+			if (correction.Length != _numParameters)
+				throw new ArgumentException("This function has exactly " + _numParameters + " parameters.");
+			for (int i = 0; i < _numParameters; i++)
+				_parameters[i] += correction[i];
+		}
+
+		public void UpdateParameters(List<double> correction)
+		{
+			if (correction.Count != _numParameters)
+				throw new ArgumentException("This function has exactly " + _numParameters + " parameters.");
+			for (int i = 0; i < _numParameters; i++)
+				_parameters[i] += correction[i];
+		}
+
+		public void ResetParameters()
+		{
+			for (int i = 0; i < _numParameters; i++)
+				_parameters[i] = MathHandler.Rand.NextDouble() * 2 - 1;
 		}
 	}
 }

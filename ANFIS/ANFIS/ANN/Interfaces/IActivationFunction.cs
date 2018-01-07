@@ -2,7 +2,8 @@
 {
 	public interface IActivationFunction
 	{
-		double Function(double x);
-		double Derivation(double x);
+		double ValueAt(double x);
+		void ResetWeights();
+		double[] GetWeights();
 	}
 }

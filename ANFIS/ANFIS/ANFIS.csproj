@@ -49,6 +49,9 @@
     <ApplicationIcon>Resources\brain-stock-photo-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ILNumerics.Computing, Version=4.14.0.0, Culture=neutral, PublicKeyToken=8d9bf50ef854734d, processorArchitecture=MSIL" />
+    <Reference Include="ILNumerics.Core, Version=4.14.0.0, Culture=neutral, PublicKeyToken=9651adc37f12bb00, processorArchitecture=MSIL" />
+    <Reference Include="ILNumerics.Drawing, Version=4.14.0.0, Culture=neutral, PublicKeyToken=e22c8a010c3b081a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
@@ -63,23 +66,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ANN\Interfaces\INeuronLayer.cs" />
+    <Compile Include="ANN\NeuronClasses\InputNeuron.cs" />
+    <Compile Include="ANN\NeuronClasses\MultiplicationNeuron.cs" />
+    <Compile Include="ANN\NeuronClasses\NormalizationNeuron.cs" />
+    <Compile Include="ANN\NeuronClasses\OutputNeuron.cs" />
+    <Compile Include="ANN\NeuronLayer.cs" />
+    <Compile Include="ANN\Structures\LayerInfo.cs" />
     <Compile Include="Handlers\Mathematics\Abstract\AFunction.cs" />
-    <Compile Include="ANN\CriterionFunction.cs" />
+    <Compile Include="ANN\Functions\Error.cs" />
     <Compile Include="Handlers\Mathematics\Functions.cs" />
     <Compile Include="ANN\Interfaces\IActivationFunction.cs" />
+    <Compile Include="Handlers\Mathematics\Interface\IAdaptingFunction.cs" />
     <Compile Include="Handlers\Mathematics\Interface\IFunction.cs" />
     <Compile Include="ANN\Interfaces\INeuron.cs" />
     <Compile Include="ANN\NeuralNetwork.cs" />
-    <Compile Include="ANN\Neuron.cs" />
-    <Compile Include="ANN\ActivationFunctions.cs" />
-    <Compile Include="ANN\NeuronLayer.cs" />
-    <Compile Include="Handlers\GUI\Drawer.cs" />
+    <Compile Include="ANN\NeuronClasses\FunctionNeuron.cs" />
+    <Compile Include="ANN\Functions\ActivationFunctions.cs" />
     <Compile Include="Handlers\Error\ErrorHandler.cs" />
     <Compile Include="Handlers\IO\FileHandler.cs" />
     <Compile Include="Handlers\Mathematics\MathHandler.cs" />
     <Compile Include="Handlers\IO\Parser.cs" />
     <Compile Include="Handlers\GUI\UIHandler.cs" />
     <Compile Include="Handlers\Mathematics\Sampler.cs" />
+    <Compile Include="ILNumerics_deploy\ILNHelper.cs" />
     <Compile Include="Structures\BackpropagationType.cs" />
     <Compile Include="Structures\InputParams.cs" />
     <Compile Include="Handlers\IO\Interfaces\IFileHandler.cs" />
@@ -99,7 +109,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures\Instance.cs" />
+    <Compile Include="ANN\Structures\NeuronType.cs" />
     <Compile Include="Structures\Sample.cs" />
+    <EmbeddedResource Include="ILNumerics_deploy\ilnumerics.lic" />
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>
@@ -116,6 +128,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="ILNumerics_deploy\ILNImports1.targets" />
+    <None Include="ILNumerics_deploy\ILNImports2.targets" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -148,5 +162,8 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="ILNumerics_deploy\ILNImports1.targets" Condition="$(ILNLicCompile) != 'true'" />
+  <Import Project="ILNumerics_deploy\ILNImports2.targets" Condition="$(ILNLicCompile) == 'true'" />
 </Project>

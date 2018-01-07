@@ -14,12 +14,14 @@ namespace ANFIS.Handlers.IO
 		
 		private const string SamplesInFile = "Samples";
 		private const string VariablesPerSample = "Per sample variables";
+		private const string FunctionString = "Function";
 
 		private readonly FileHandler _fileHandler;
 		private Instance _instance;
 		
 		private int _numSamples;
 		private int _numVariables;
+		private string _functionString;
 		
 		private int _iSamples;
 
@@ -32,6 +34,7 @@ namespace ANFIS.Handlers.IO
 		public Instance ParseData(string fileName)
 		{
 			var data = _fileHandler.ReadFile(fileName);
+			_iSamples = 0;
 			for (var i = 0; i < data.Length; i++)
 			{
 				ParseLine(data[i], i + 1);
@@ -47,12 +50,13 @@ namespace ANFIS.Handlers.IO
 
 		private static string[] FormatData(Instance input)
 		{
-			const int displacement = 3;
+			const int displacement = 4;
 			string[] result = new string[input.NumSamples + displacement];
 
 			result[0] = InstanceInfo + SamplesInFile + " " + input.NumSamples;
 			result[1] = InstanceInfo + VariablesPerSample + " " + input.NumVariables;
-			result[2] = EmptyLine;
+			result[2] = InstanceInfo + FunctionString + " " + input.OriginalFunction.ToString();
+			result[3] = EmptyLine;
 
 			for (var i = 0; i < input.NumSamples; i++)
 			{
@@ -74,9 +78,8 @@ namespace ANFIS.Handlers.IO
 		{
 			if (line.StartsWith(Comment) || line is EmptyLine)
 			{
-				Instance temp = new Instance(_numSamples, _numVariables);
-				if (_instance is null || !_instance.Equals(temp))
-					_instance = new Instance( _numSamples, _numVariables);
+				_instance = new Instance(_numSamples, _numVariables);
+				_instance.AddFunction(_functionString);
 				return;
 			}
 				
@@ -102,6 +105,10 @@ namespace ANFIS.Handlers.IO
 				var success = int.TryParse(splits[splits.Length - 1], out _numVariables);
 				if (!success)
 					ErrorHandler.TerminateExecution(ErrorCode.ImproperLine);
+			}
+			else if (line.Contains(FunctionString))
+			{
+				_functionString = splits[splits.Length - 1];
 			}
 		}
 
