@@ -26,7 +26,7 @@ namespace ANFIS.ANN
 		public double Eta { get; set; }
 		public double DesiredError { get; set; }
 		public double TotalError { get; private set; }
-		public List<double> ErrorTimeline { get; private set; }
+		public List<double> ErrorTimeline { get; }
 		public Instance Instance { get; }
 
 		private double[] _averageProbabilityOutcome;
@@ -43,7 +43,7 @@ namespace ANFIS.ANN
 
 		public const double DesiredErrorMin = 0;
 		public const double DesiredErrorDefault = 100;
-		public const double DesiredErrorMax = 100;
+		public const double DesiredErrorMax = 10000;
 
 		public const int IterationLimit = 100000;
 		public const int TimeLimit = 120; // in seconds
@@ -93,6 +93,7 @@ namespace ANFIS.ANN
 			Stopwatch stopwatch = new Stopwatch();
 			stopwatch.Start();
 			totalTime.Start();
+			ErrorTimeline.Add(TotalError);
 			while (TotalError > DesiredError && iter++ < IterationLimit && totalTime.Elapsed.TotalSeconds < TimeLimit)
 			{
 				Backpropagation(batches);
@@ -103,6 +104,7 @@ namespace ANFIS.ANN
 					continue;
 				}
 				Evaluate();
+				ErrorTimeline.Add(TotalError);
 				UpdateInfo(panel, totalError, this);
 				stopwatch.Restart();
 			}
@@ -260,7 +262,7 @@ namespace ANFIS.ANN
 			}
 		}
 
-		private double[] GetOutput(double[] inputs)
+		public double[] GetOutput(double[] inputs)
 		{
 			double[] tempInputs = inputs;
 			for (var i = 0; i < NumberOfLayers; i++)
@@ -416,6 +418,110 @@ namespace ANFIS.ANN
 			box.Items.Add(BackpropagationHandler.ToString(BackpropagationType.Batch));
 			box.Items.Add(BackpropagationHandler.ToString(BackpropagationType.Online));
 			box.SelectedItem = box.Items[0];
+		}
+
+		public static void FillResults(ILPanel panel, Panel panelFuzzySets, NeuralNetwork ann)
+		{
+			SetFuzzySets(panelFuzzySets, ann);
+			int xmin = (int)ann.Instance.Samples[0].Variables[0];
+			int xmax = (int)ann.Instance.Samples[ann.Instance.NumSamples - 1].Variables[0];
+			int ymin = (int)ann.Instance.Samples[0].Variables[1];
+			int ymax = (int)ann.Instance.Samples[ann.Instance.NumSamples - 1].Variables[0];
+
+			ErrorFunction er = new ErrorFunction(ann.Instance.Samples, ann);
+			ILPlotCube cube = new ILPlotCube(twoDMode: false)
+			{
+				// rotate plot cube
+				Rotation = Matrix4.Rotation(new Vector3(-1, 1, .1f), 0.4f),
+				// perspective projection
+				Projection = Projection.Perspective,
+				Children =
+				{
+					new ILSurface((x, y) => (float) Convert(er.ValueAt, x, y),
+						xmin, xmax, xmax - xmin + 1,
+						ymin, ymax, ymax - ymin + 1,
+						(x, y) => x * y,
+						colormap: Colormaps.Hsv)
+					{
+						UseLighting = true
+					}
+				}
+			};
+			panel.Scene.Remove(panel.Scene.First<ILPlotCube>());
+			panel.Scene.Add(cube);
+			panel.Scene.Screen.Add(new ILLabel("Error per sample")
+			{
+				Position = new Vector3(1, 0, 0),
+				Anchor = new PointF(1, 0)
+			});
+			panel.Refresh();
+		}
+
+		private static void SetFuzzySets(Panel panel, NeuralNetwork ann)
+		{
+			foreach (TableLayoutPanel item in panel.Controls.OfType<TableLayoutPanel>())
+				panel.Controls.Remove(item);
+			
+			panel.AutoScroll = true;
+			panel.AutoSize = false;
+
+			TableLayoutPanel table = new TableLayoutPanel();
+			table.Dock = DockStyle.None;
+			table.AutoSize = true;
+			table.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+			table.AutoScroll = false;
+			int numVariables = ann.Instance.NumVariables;
+			int numRules = ann.NumberOfRules;
+			var columnCount = numRules;
+			int rowCount = numVariables;
+
+			IActivationFunction[] func = ann.GetFunctions();
+			double[] xValues = new double[50];
+			double[] yValues = new double[50];
+			for (int i = 0; i < 50; i++)
+			{
+				xValues[i] = -10 + (10.0 + 10.0) / 50.0 * i;
+			}
+			ILArray<float> xs = (double[])xValues.Clone();		
+
+			for (var i = 0; i < rowCount; i++)
+			{
+				table.RowCount++;
+				table.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+				for (int j = 0; j < columnCount; j++)
+				{
+					int ruleId = j + 1;
+					int variableId = i + 1;
+					string label = "Rule " + ruleId + ", variable " + variableId;
+					ILPanel newPanel = new ILPanel();
+					for (int k = 0; k < 50; k++)
+					{
+						yValues[k] = func[i * columnCount + j].ValueAt(xValues[k]);
+					}
+					ILArray<float> ys = (double[])yValues.Clone();
+					newPanel.Scene.Add(new ILPlotCube{new ILLinePlot(xs, ys, lineWidth: 2, lineColor: Color.Black) });
+					newPanel.Scene.Screen.Add(new ILLabel(label)
+					{
+						Position = new Vector3(1, 0, 0),
+						Anchor = new PointF(1, 0)
+					});
+
+					table.ColumnCount++;
+					table.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+					table.Controls.Add(newPanel, j, i);
+				}
+			}
+			panel.Controls.Add(table);
+		}
+
+		private IActivationFunction[] GetFunctions()
+		{
+			IActivationFunction[] functions = new IActivationFunction[_architecture[0].NumberOfNeurons];
+			for (int i = 0; i < _architecture[0].NumberOfNeurons; i++)
+			{
+				functions[i] = _layers[0].GetFunction(i);
+			}
+			return functions;
 		}
 	}
 }

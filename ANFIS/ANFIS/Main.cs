@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 using ANFIS.ANN;
 using ANFIS.Handlers.Error;
@@ -8,6 +7,7 @@ using ANFIS.Handlers.GUI;
 using ANFIS.Handlers.IO;
 using ANFIS.Handlers.Mathematics;
 using ANFIS.Structures;
+using Point = System.Drawing.Point;
 
 namespace ANFIS
 {
@@ -211,16 +211,28 @@ namespace ANFIS
 		{
 			if (!(sender is Panel panel)) return;
 			if (!panel.Visible) return;
+			textBoxSaveName.Text = @"Default";
+			NeuralNetwork.FillResults(ilPanelResults, panelFuzzySets, _ann);
 		}
 
-		private void Test_Click(object sender, EventArgs e)
+		private void Save_Click(object sender, EventArgs e)
 		{
-			
+			panelSave.Visible = true;
+		}
+		
+		private void buttonCancel_Click(object sender, EventArgs e)
+		{
+			panelSave.Visible = false;
+		}
+
+		private void buttonSaveResults_Click(object sender, EventArgs e)
+		{
+			panelSave.Visible = false;
+			_parser.FormatAndSaveResult(textBoxSaveName.Text, _ann.ErrorTimeline);
 		}
 
 		private void ButtonTest_Click(object sender, EventArgs e)
 		{
-			buttonSaveResult.Enabled = false;
 			UiHandler.SetSlider(panelSlider, buttonResult.Top, buttonResult.Height);
 			UiHandler.PanelVisible(panelResult, _panels);
 		}

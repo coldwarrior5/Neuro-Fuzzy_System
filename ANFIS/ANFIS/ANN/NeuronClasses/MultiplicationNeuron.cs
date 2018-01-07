@@ -41,5 +41,10 @@ namespace ANFIS.ANN.NeuronClasses
 		{
 			return null;
 		}
+
+		public IActivationFunction GetFunction()
+		{
+			return null;
+		}
 	}
 }

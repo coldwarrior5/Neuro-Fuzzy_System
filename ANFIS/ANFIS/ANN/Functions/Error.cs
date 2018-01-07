@@ -25,19 +25,19 @@ namespace ANFIS.ANN.Functions
 	{
 		private readonly int _numVariables;
 		private readonly Sample[] _samples;
-		private readonly IFunction _estimator;
+		private readonly NeuralNetwork _ann;
 
-		public ErrorFunction(Sample[] samples, IFunction estimator)
+		public ErrorFunction(Sample[] samples, NeuralNetwork ann)
 		{
 			_numVariables = samples.Length;
 			_samples = samples;
-			_estimator = estimator;
+			_ann = ann;
 		}
 
 		public double ValueAt(double[] variables)
 		{
-			var expectedOutput = FindSample(variables);
-			return _estimator.ValueAt(variables) - expectedOutput;
+			bool found = FindSample(variables, out double expectedOutput);
+			return found ? _ann.GetOutput(variables)[0] - expectedOutput : 0;
 		}
 
 		public int GetNumVariables()
@@ -50,14 +50,18 @@ namespace ANFIS.ANN.Functions
 			return "DeltaFunction";
 		}
 
-		private double FindSample(double[] variables)
+		private bool FindSample(double[] variables, out double result)
 		{
 			for (int i = 0; i < _numVariables; i++)
 			{
 				if (_samples[i].Variables.SequenceEqual(variables))
-					return _samples[i].Value;
+				{
+					result = _samples[i].Value;
+					return true;
+				}
 			}
-			throw new IndexOutOfRangeException("No such sample can be found");
+			result = 0;
+			return false;
 		}
 	}
 }

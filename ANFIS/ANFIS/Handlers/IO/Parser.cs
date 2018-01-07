@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using ANFIS.Handlers.Error;
 using ANFIS.Handlers.IO.Interfaces;
 using ANFIS.Structures;
@@ -33,7 +34,7 @@ namespace ANFIS.Handlers.IO
 
 		public Instance ParseData(string fileName)
 		{
-			var data = _fileHandler.ReadFile(fileName);
+			var data = _fileHandler.ReadFile(fileName, FileHandler.FunctionExtension);
 			_iSamples = 0;
 			for (var i = 0; i < data.Length; i++)
 			{
@@ -45,7 +46,12 @@ namespace ANFIS.Handlers.IO
 
 		public void FormatAndSaveResult(string fileName, Instance result)
 		{
-			_fileHandler.SaveFile(fileName, FormatData(result));
+			_fileHandler.SaveFile(fileName, FileHandler.FunctionExtension, FormatData(result));
+		}
+
+		public void FormatAndSaveResult(string fileName, List<double> result)
+		{
+			_fileHandler.SaveFile(fileName, FileHandler.ResultExtension, FormatData(result));
 		}
 
 		private static string[] FormatData(Instance input)
@@ -70,6 +76,17 @@ namespace ANFIS.Handlers.IO
 						result[i + displacement] += "'], ";
 				}
 				result[i + displacement] += "['" + input.Samples[i].Value + "']";
+			}
+			return result;
+		}
+
+		private static string[] FormatData(IReadOnlyList<double> input)
+		{
+			string[] result = new string[input.Count];
+
+			for (var i = 0; i < input.Count; i++)
+			{
+				result[i] = i + ": " + input[i].ToString("G17");
 			}
 			return result;
 		}

@@ -1,5 +1,4 @@
-﻿using System;
-using ANFIS.Handlers.Mathematics.Interface;
+﻿using ANFIS.Handlers.Mathematics.Interface;
 
 namespace ANFIS.Handlers.Mathematics.Abstract
 {

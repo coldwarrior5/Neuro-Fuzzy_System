@@ -65,14 +65,21 @@ namespace ANFIS
 			this.Train = new System.Windows.Forms.Button();
 			this.GoToResults = new System.Windows.Forms.Button();
 			this.panelResult = new System.Windows.Forms.Panel();
-			this.buttonSaveResult = new System.Windows.Forms.Button();
 			this.ilPanelResults = new ILNumerics.Drawing.ILPanel();
+			this.buttonSaveResult = new System.Windows.Forms.Button();
+			this.panelSave = new System.Windows.Forms.Panel();
+			this.textBoxSaveName = new System.Windows.Forms.TextBox();
+			this.buttonSaveResults = new System.Windows.Forms.Button();
+			this.label1 = new System.Windows.Forms.Label();
+			this.buttonCancel = new System.Windows.Forms.Button();
+			this.panelFuzzySets = new System.Windows.Forms.Panel();
 			this.progressionPanel.SuspendLayout();
 			this.titleBar.SuspendLayout();
 			this.panelTrainSet.SuspendLayout();
 			this.panelFunction.SuspendLayout();
 			this.panelTrain.SuspendLayout();
 			this.panelResult.SuspendLayout();
+			this.panelSave.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// progressionPanel
@@ -449,6 +456,8 @@ namespace ANFIS
 			// 
 			// panelResult
 			// 
+			this.panelResult.Controls.Add(this.panelSave);
+			this.panelResult.Controls.Add(this.panelFuzzySets);
 			this.panelResult.Controls.Add(this.ilPanelResults);
 			this.panelResult.Controls.Add(this.buttonSaveResult);
 			this.panelResult.Location = new System.Drawing.Point(175, 38);
@@ -458,9 +467,21 @@ namespace ANFIS
 			this.panelResult.Visible = false;
 			this.panelResult.VisibleChanged += new System.EventHandler(this.TestPanel_Visible);
 			// 
+			// ilPanelResults
+			// 
+			this.ilPanelResults.Driver = ILNumerics.Drawing.RendererTypes.OpenGL;
+			this.ilPanelResults.Editor = null;
+			this.ilPanelResults.Location = new System.Drawing.Point(143, 264);
+			this.ilPanelResults.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.ilPanelResults.Name = "ilPanelResults";
+			this.ilPanelResults.Rectangle = ((System.Drawing.RectangleF)(resources.GetObject("ilPanelResults.Rectangle")));
+			this.ilPanelResults.ShowUIControls = false;
+			this.ilPanelResults.Size = new System.Drawing.Size(357, 191);
+			this.ilPanelResults.TabIndex = 1;
+			this.ilPanelResults.Timeout = ((uint)(0u));
+			// 
 			// buttonSaveResult
 			// 
-			this.buttonSaveResult.Enabled = false;
 			this.buttonSaveResult.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.buttonSaveResult.Location = new System.Drawing.Point(214, 460);
 			this.buttonSaveResult.Name = "buttonSaveResult";
@@ -468,19 +489,66 @@ namespace ANFIS
 			this.buttonSaveResult.TabIndex = 0;
 			this.buttonSaveResult.Text = "Save result";
 			this.buttonSaveResult.UseVisualStyleBackColor = true;
-			this.buttonSaveResult.Click += new System.EventHandler(this.Test_Click);
+			this.buttonSaveResult.Click += new System.EventHandler(this.Save_Click);
 			// 
-			// ilPanelResults
+			// panelSave
 			// 
-			this.ilPanelResults.Driver = ILNumerics.Drawing.RendererTypes.OpenGL;
-			this.ilPanelResults.Editor = null;
-			this.ilPanelResults.Location = new System.Drawing.Point(47, 4);
-			this.ilPanelResults.Name = "ilPanelResults";
-			this.ilPanelResults.Rectangle = ((System.Drawing.RectangleF)(resources.GetObject("ilPanelResults.Rectangle")));
-			this.ilPanelResults.ShowUIControls = false;
-			this.ilPanelResults.Size = new System.Drawing.Size(539, 441);
-			this.ilPanelResults.TabIndex = 1;
-			this.ilPanelResults.Timeout = ((uint)(0u));
+			this.panelSave.Controls.Add(this.buttonCancel);
+			this.panelSave.Controls.Add(this.label1);
+			this.panelSave.Controls.Add(this.buttonSaveResults);
+			this.panelSave.Controls.Add(this.textBoxSaveName);
+			this.panelSave.Location = new System.Drawing.Point(141, 90);
+			this.panelSave.Name = "panelSave";
+			this.panelSave.Size = new System.Drawing.Size(361, 202);
+			this.panelSave.TabIndex = 2;
+			this.panelSave.Visible = false;
+			// 
+			// textBoxSaveName
+			// 
+			this.textBoxSaveName.Font = new System.Drawing.Font("Century Gothic", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.textBoxSaveName.Location = new System.Drawing.Point(91, 72);
+			this.textBoxSaveName.Name = "textBoxSaveName";
+			this.textBoxSaveName.Size = new System.Drawing.Size(184, 34);
+			this.textBoxSaveName.TabIndex = 0;
+			// 
+			// buttonSaveResults
+			// 
+			this.buttonSaveResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonSaveResults.Location = new System.Drawing.Point(11, 129);
+			this.buttonSaveResults.Name = "buttonSaveResults";
+			this.buttonSaveResults.Size = new System.Drawing.Size(166, 45);
+			this.buttonSaveResults.TabIndex = 1;
+			this.buttonSaveResults.Text = "Save";
+			this.buttonSaveResults.UseVisualStyleBackColor = true;
+			this.buttonSaveResults.Click += new System.EventHandler(this.buttonSaveResults_Click);
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Font = new System.Drawing.Font("Century Gothic", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label1.Location = new System.Drawing.Point(91, 32);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(167, 25);
+			this.label1.TabIndex = 2;
+			this.label1.Text = "Save results as";
+			// 
+			// buttonCancel
+			// 
+			this.buttonCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonCancel.Location = new System.Drawing.Point(183, 129);
+			this.buttonCancel.Name = "buttonCancel";
+			this.buttonCancel.Size = new System.Drawing.Size(166, 45);
+			this.buttonCancel.TabIndex = 3;
+			this.buttonCancel.Text = "Cancel";
+			this.buttonCancel.UseVisualStyleBackColor = true;
+			this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+			// 
+			// panelFuzzySets
+			// 
+			this.panelFuzzySets.Location = new System.Drawing.Point(35, 4);
+			this.panelFuzzySets.Name = "panelFuzzySets";
+			this.panelFuzzySets.Size = new System.Drawing.Size(552, 247);
+			this.panelFuzzySets.TabIndex = 3;
 			// 
 			// Main
 			// 
@@ -509,6 +577,8 @@ namespace ANFIS
 			this.panelTrain.ResumeLayout(false);
 			this.panelTrain.PerformLayout();
 			this.panelResult.ResumeLayout(false);
+			this.panelSave.ResumeLayout(false);
+			this.panelSave.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -551,6 +621,12 @@ namespace ANFIS
 		private Label labelRules;
 		private ILNumerics.Drawing.ILPanel ilPanelFunctions;
 		private ILNumerics.Drawing.ILPanel ilPanelResults;
+		private Panel panelSave;
+		private Button buttonCancel;
+		private Label label1;
+		private Button buttonSaveResults;
+		private TextBox textBoxSaveName;
+		private Panel panelFuzzySets;
 	}
 }
 

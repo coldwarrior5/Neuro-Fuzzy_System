@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ANFIS.Handlers.Mathematics.Interface
+﻿namespace ANFIS.Handlers.Mathematics.Interface
 {
 	public interface IFunction
 	{

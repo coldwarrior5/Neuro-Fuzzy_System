@@ -11,7 +11,7 @@ namespace ANFIS.Structures
 		public static void FillTrainSetChoices(ComboBox loadTrainSetBox, ComboBox functionsBox)
 		{
 			FileHandler fileHandler = new FileHandler();
-			List<string> files = fileHandler.FileList();
+			List<string> files = fileHandler.FileList(FileHandler.FunctionExtension);
 			FillComboBox(loadTrainSetBox, files);
 			FillComboBox(functionsBox, Functions.GetFunctions());
 		}

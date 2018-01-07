@@ -109,5 +109,10 @@ namespace ANFIS.ANN
 		{
 			return _neurons[index].GetParameters();
 		}
+
+		public IActivationFunction GetFunction(int index)
+		{
+			return _neurons[index].GetFunction();
+		}
 	}
 }

@@ -50,6 +50,11 @@ namespace ANFIS.ANN.NeuronClasses
 			return _function.GetWeights();
 		}
 
+		public IActivationFunction GetFunction()
+		{
+			return _function;
+		}
+
 		private void UpdateA(double correction)
 		{
 			((Sigmoid)_function).UpdateA(correction);

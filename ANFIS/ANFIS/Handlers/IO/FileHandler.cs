@@ -8,7 +8,8 @@ namespace ANFIS.Handlers.IO
 	public class FileHandler : IFileHandler
 	{
 		private readonly string _folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ANFIS");
-		private const string Extension = ".ann";
+		public const string FunctionExtension = ".ann";
+		public const string ResultExtension = ".res";
 
 		public FileHandler()
 		{	
@@ -16,14 +17,14 @@ namespace ANFIS.Handlers.IO
 				Directory.CreateDirectory(_folder);
 		}
 
-		public string[] ReadFile(string fileName)
+		public string[] ReadFile(string fileName, string extension)
 		{
-			var inputFileName = fileName + Extension;
+			var inputFileName = fileName + extension;
 			var filePath = Path.Combine(_folder, inputFileName);
 			return File.Exists(filePath) ? File.ReadAllLines(filePath) : null;
 		}
 
-		public void SaveFile(string fileName, string[] outputBuffer)
+		public void SaveFile(string fileName, string extension, string[] outputBuffer)
 		{
 			int i = 1;
 			var num = "";
@@ -31,7 +32,7 @@ namespace ANFIS.Handlers.IO
 
 			while (true)
 			{
-				var outputName = fileName + num + Extension;
+				var outputName = fileName + num + extension;
 				filePath = Path.Combine(_folder, outputName);
 				if (File.Exists(filePath))
 				{
@@ -44,13 +45,13 @@ namespace ANFIS.Handlers.IO
 			File.WriteAllLines(filePath, outputBuffer);
 		}
 
-		public List<string> FileList()
+		public List<string> FileList(string extension)
 		{
 			List<string> retList = new List<string>();
 			IEnumerator<string> iter = Directory.EnumerateFiles(_folder).GetEnumerator();
 			while (iter.MoveNext())
 			{
-				if(iter.Current != null && Path.GetExtension(iter.Current).Equals(Extension))
+				if(iter.Current != null && Path.GetExtension(iter.Current).Equals(extension))
 				{
 					retList.Add(Path.GetFileNameWithoutExtension(iter.Current));
 				}
