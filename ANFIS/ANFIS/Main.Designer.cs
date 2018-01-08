@@ -62,8 +62,9 @@ namespace ANFIS
 			this.labelDesiredError = new System.Windows.Forms.Label();
 			this.labelEta = new System.Windows.Forms.Label();
 			this.labelType = new System.Windows.Forms.Label();
-			this.Train = new System.Windows.Forms.Button();
 			this.GoToResults = new System.Windows.Forms.Button();
+			this.buttonStop = new System.Windows.Forms.Button();
+			this.Train = new System.Windows.Forms.Button();
 			this.panelResult = new System.Windows.Forms.Panel();
 			this.panelSave = new System.Windows.Forms.Panel();
 			this.buttonCancel = new System.Windows.Forms.Button();
@@ -73,7 +74,6 @@ namespace ANFIS
 			this.panelFuzzySets = new System.Windows.Forms.Panel();
 			this.ilPanelResults = new ILNumerics.Drawing.ILPanel();
 			this.buttonSaveResult = new System.Windows.Forms.Button();
-			this.buttonStop = new System.Windows.Forms.Button();
 			this.progressionPanel.SuspendLayout();
 			this.titleBar.SuspendLayout();
 			this.panelTrainSet.SuspendLayout();
@@ -319,9 +319,9 @@ namespace ANFIS
 			this.panelTrain.Controls.Add(this.labelDesiredError);
 			this.panelTrain.Controls.Add(this.labelEta);
 			this.panelTrain.Controls.Add(this.labelType);
-			this.panelTrain.Controls.Add(this.Train);
 			this.panelTrain.Controls.Add(this.buttonStop);
 			this.panelTrain.Controls.Add(this.GoToResults);
+			this.panelTrain.Controls.Add(this.Train);
 			this.panelTrain.Location = new System.Drawing.Point(175, 38);
 			this.panelTrain.Name = "panelTrain";
 			this.panelTrain.Size = new System.Drawing.Size(625, 562);
@@ -433,17 +433,6 @@ namespace ANFIS
 			this.labelType.TabIndex = 7;
 			this.labelType.Text = "Backpropagation type:";
 			// 
-			// Train
-			// 
-			this.Train.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.Train.Location = new System.Drawing.Point(214, 460);
-			this.Train.Name = "Train";
-			this.Train.Size = new System.Drawing.Size(207, 48);
-			this.Train.TabIndex = 1;
-			this.Train.Text = "Train";
-			this.Train.UseVisualStyleBackColor = true;
-			this.Train.Click += new System.EventHandler(this.Train_Click);
-			// 
 			// GoToResults
 			// 
 			this.GoToResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -454,7 +443,30 @@ namespace ANFIS
 			this.GoToResults.Text = "See results";
 			this.GoToResults.UseVisualStyleBackColor = true;
 			this.GoToResults.Visible = false;
-			this.GoToResults.Click += new System.EventHandler(this.GoToTest_Click);
+			this.GoToResults.Click += new System.EventHandler(this.GoToResult_Click);
+			// 
+			// buttonStop
+			// 
+			this.buttonStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonStop.Location = new System.Drawing.Point(214, 460);
+			this.buttonStop.Name = "buttonStop";
+			this.buttonStop.Size = new System.Drawing.Size(208, 48);
+			this.buttonStop.TabIndex = 20;
+			this.buttonStop.Text = "Stop";
+			this.buttonStop.UseVisualStyleBackColor = true;
+			this.buttonStop.Visible = false;
+			this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
+			// 
+			// Train
+			// 
+			this.Train.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.Train.Location = new System.Drawing.Point(214, 460);
+			this.Train.Name = "Train";
+			this.Train.Size = new System.Drawing.Size(207, 48);
+			this.Train.TabIndex = 1;
+			this.Train.Text = "Train";
+			this.Train.UseVisualStyleBackColor = true;
+			this.Train.Click += new System.EventHandler(this.Train_Click);
 			// 
 			// panelResult
 			// 
@@ -551,17 +563,6 @@ namespace ANFIS
 			this.buttonSaveResult.Text = "Save result";
 			this.buttonSaveResult.UseVisualStyleBackColor = true;
 			this.buttonSaveResult.Click += new System.EventHandler(this.Save_Click);
-			// 
-			// buttonStop
-			// 
-			this.buttonStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.buttonStop.Location = new System.Drawing.Point(214, 460);
-			this.buttonStop.Name = "buttonStop";
-			this.buttonStop.Size = new System.Drawing.Size(208, 48);
-			this.buttonStop.TabIndex = 20;
-			this.buttonStop.Text = "Stop";
-			this.buttonStop.UseVisualStyleBackColor = true;
-			this.buttonStop.Visible = false;
 			// 
 			// Main
 			// 

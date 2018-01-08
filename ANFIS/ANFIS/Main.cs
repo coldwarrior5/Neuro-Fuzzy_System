@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Forms;
 using ANFIS.ANN;
 using ANFIS.Handlers.Error;
@@ -13,11 +14,11 @@ namespace ANFIS
 {
 	public partial class Main : Form
 	{
+		public BackgroundWorker Worker;
 		private Mover _screenMover;
 		private Parser _parser;
 		private Instance _instance;
 		private List<Panel> _panels;
-		
 		private NeuralNetwork _ann;
 
 		public Main()
@@ -42,7 +43,7 @@ namespace ANFIS
 		private void SetNeuralNetwork()
 		{
 			if(_ann is null || !_ann.Instance.Equals(_instance))
-				_ann = new NeuralNetwork(_instance);
+				_ann = new NeuralNetwork(_instance, ilPanelFunctions, labelTotalError);
 		}
 		// ______________________________________________________________
 
@@ -179,16 +180,20 @@ namespace ANFIS
 		private void Train_Click(object sender, EventArgs e)
 		{
 			Train.Visible = false;
-			buttonCancel.Visible = true;
-			_ann.Train(ilPanelFunctions, labelTotalError);
-			GoToResults.Visible = true;
+			buttonStop.Visible = true;
+			Worker worker = new Worker(_ann, buttonStop, GoToResults);
+			worker.Start();
 		}
 
-		private void GoToTest_Click(object sender, EventArgs e)
+		private void buttonStop_Click(object sender, EventArgs e)
+		{
+			_ann.Stop = true;
+		}
+
+		private void GoToResult_Click(object sender, EventArgs e)
 		{
 			Train.Visible = true;
 			GoToResults.Visible = false;
-			GoToResults.Enabled = false;
 			UiHandler.PanelVisible(panelResult, _panels);
 			buttonResult.Enabled = true;
 			UiHandler.SetSlider(panelSlider, buttonResult.Top, buttonResult.Height);
@@ -196,9 +201,10 @@ namespace ANFIS
 
 		private void ButtonTrain_Click(object sender, EventArgs e)
 		{
-			_ann?.ResetTraining();
 			Train.Visible = true;
+			buttonStop.Visible = false;
 			GoToResults.Visible = false;
+			_ann?.ResetTraining();
 			UiHandler.SetSlider(panelSlider, buttonTrain.Top, buttonTrain.Height);
 			buttonResult.Enabled = false;
 			UiHandler.PanelVisible(panelTrain, _panels);

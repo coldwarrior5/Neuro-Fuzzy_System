@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Forms;
+using ANFIS.ANN;
 using ANFIS.Handlers.Mathematics;
+using Point = System.Drawing.Point;
 
 namespace ANFIS.Handlers.GUI
 {
@@ -122,6 +124,35 @@ namespace ANFIS.Handlers.GUI
 		public void MouseUp()
 		{
 			_mouseDown = false;
+		}
+	}
+
+	public class Worker
+	{
+		private readonly NeuralNetwork _ann;
+		private readonly BackgroundWorker _worker;
+		private readonly Button _stop;
+		private readonly Button _result;
+
+		public Worker(NeuralNetwork ann, Button stop, Button result)
+		{
+			_ann = ann;
+			_stop = stop;
+			_result = result;
+			_worker = new BackgroundWorker();
+		}
+
+		public void Start()
+		{
+			_worker.DoWork += _ann.Train;
+			_worker.RunWorkerCompleted += worker_Finished;
+			_worker.RunWorkerAsync();
+		}
+
+		void worker_Finished(object sender, RunWorkerCompletedEventArgs e)
+		{
+			_stop.Visible = false;
+			_result.Visible = true;
 		}
 	}
 }

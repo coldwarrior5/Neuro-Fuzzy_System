@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -30,6 +31,8 @@ namespace ANFIS.ANN
 		public double TotalError { get; private set; }
 		public List<double> ErrorTimeline { get; }
 		public Instance Instance { get; }
+		private ILPanel _panel;
+		private Label _label;
 
 		private double[] _fuzzySetProbability;
 		private double[] _probabilityOutcome;
@@ -53,11 +56,13 @@ namespace ANFIS.ANN
 		public const int IterationLimit = 100000;
 		public const int TimeLimit = 120; // in seconds
 
-		public const double RefreshRate = 0.25; // Every quarter a second update the graph
+		public const double RefreshRate = 0.5;
 
-		public NeuralNetwork(Instance instance)
+		public NeuralNetwork(Instance instance, ILPanel panel, Label label)
 		{
 			Instance = instance;
+			_panel = panel;
+			_label = label;
 			NumberOfRules = RulesDefault;
 			DesiredError = DesiredErrorDefault;
 			Eta = EtaDefault;
@@ -91,7 +96,7 @@ namespace ANFIS.ANN
 			architecture[4] = new LayerInfo ( NumberOfRules, 1, NeuronType.Output );
 		}
 
-		public void Train(ILPanel panel, Label totalError)
+		public void Train(object sender, DoWorkEventArgs e)
 		{
 			InitNetwork();
 			int iter = 0;
@@ -106,10 +111,10 @@ namespace ANFIS.ANN
 				if (iter % EtaChangePeriod == 0)
 					Eta -= Eta / 10;
 				Backpropagation(batches);
-				if (stopwatch.Elapsed.TotalSeconds < RefreshRate) continue;
 				Evaluate();
 				ErrorTimeline.Add(TotalError);
-				UpdateInfo(panel, totalError, this);
+				if (stopwatch.Elapsed.TotalSeconds < RefreshRate) continue;
+				UpdateInfo(_panel, _label, this);
 				stopwatch.Restart();
 			}
 		}
@@ -394,8 +399,11 @@ namespace ANFIS.ANN
 		public static void UpdateInfo(ILPanel panel, Label totalError, NeuralNetwork ann)
 		{
 			DrawFunctions(panel, ann);
-			totalError.Text = ann.TotalError.ToString(CultureInfo.InvariantCulture);
-			totalError.Update();
+			totalError.Invoke((Action)delegate
+			{
+				totalError.Text = ann.TotalError.ToString(CultureInfo.InvariantCulture);
+				totalError.Update();
+			});
 		}
 
 		private static void DrawFunctions(ILPanel panel, NeuralNetwork ann)
@@ -412,9 +420,12 @@ namespace ANFIS.ANN
 				colormap: Colormaps.Autumn) {
 				UseLighting = true
 			};
-			panel.Scene.Remove(panel.Scene.First<ILSurface>());
-			panel.Scene.First<ILPlotCubeDataGroup>().Insert(0, approximatedFunction);
-			panel.Refresh();
+			panel.Invoke((Action) delegate
+			{
+				panel.Scene.Remove(panel.Scene.First<ILSurface>());
+				panel.Scene.First<ILPlotCubeDataGroup>().Insert(0, approximatedFunction);
+				panel.Refresh();
+			});
 		}
 
 		public static void FillTypeChoices(ComboBox box)
