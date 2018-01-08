@@ -65,14 +65,15 @@ namespace ANFIS
 			this.Train = new System.Windows.Forms.Button();
 			this.GoToResults = new System.Windows.Forms.Button();
 			this.panelResult = new System.Windows.Forms.Panel();
+			this.panelSave = new System.Windows.Forms.Panel();
+			this.buttonCancel = new System.Windows.Forms.Button();
+			this.label1 = new System.Windows.Forms.Label();
+			this.buttonSaveResults = new System.Windows.Forms.Button();
+			this.textBoxSaveName = new System.Windows.Forms.TextBox();
+			this.panelFuzzySets = new System.Windows.Forms.Panel();
 			this.ilPanelResults = new ILNumerics.Drawing.ILPanel();
 			this.buttonSaveResult = new System.Windows.Forms.Button();
-			this.panelSave = new System.Windows.Forms.Panel();
-			this.textBoxSaveName = new System.Windows.Forms.TextBox();
-			this.buttonSaveResults = new System.Windows.Forms.Button();
-			this.label1 = new System.Windows.Forms.Label();
-			this.buttonCancel = new System.Windows.Forms.Button();
-			this.panelFuzzySets = new System.Windows.Forms.Panel();
+			this.buttonStop = new System.Windows.Forms.Button();
 			this.progressionPanel.SuspendLayout();
 			this.titleBar.SuspendLayout();
 			this.panelTrainSet.SuspendLayout();
@@ -319,6 +320,7 @@ namespace ANFIS
 			this.panelTrain.Controls.Add(this.labelEta);
 			this.panelTrain.Controls.Add(this.labelType);
 			this.panelTrain.Controls.Add(this.Train);
+			this.panelTrain.Controls.Add(this.buttonStop);
 			this.panelTrain.Controls.Add(this.GoToResults);
 			this.panelTrain.Location = new System.Drawing.Point(175, 38);
 			this.panelTrain.Name = "panelTrain";
@@ -467,6 +469,65 @@ namespace ANFIS
 			this.panelResult.Visible = false;
 			this.panelResult.VisibleChanged += new System.EventHandler(this.TestPanel_Visible);
 			// 
+			// panelSave
+			// 
+			this.panelSave.Controls.Add(this.buttonCancel);
+			this.panelSave.Controls.Add(this.label1);
+			this.panelSave.Controls.Add(this.buttonSaveResults);
+			this.panelSave.Controls.Add(this.textBoxSaveName);
+			this.panelSave.Location = new System.Drawing.Point(141, 90);
+			this.panelSave.Name = "panelSave";
+			this.panelSave.Size = new System.Drawing.Size(361, 202);
+			this.panelSave.TabIndex = 2;
+			this.panelSave.Visible = false;
+			// 
+			// buttonCancel
+			// 
+			this.buttonCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonCancel.Location = new System.Drawing.Point(183, 129);
+			this.buttonCancel.Name = "buttonCancel";
+			this.buttonCancel.Size = new System.Drawing.Size(166, 45);
+			this.buttonCancel.TabIndex = 3;
+			this.buttonCancel.Text = "Cancel";
+			this.buttonCancel.UseVisualStyleBackColor = true;
+			this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Font = new System.Drawing.Font("Century Gothic", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label1.Location = new System.Drawing.Point(91, 32);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(167, 25);
+			this.label1.TabIndex = 2;
+			this.label1.Text = "Save results as";
+			// 
+			// buttonSaveResults
+			// 
+			this.buttonSaveResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonSaveResults.Location = new System.Drawing.Point(11, 129);
+			this.buttonSaveResults.Name = "buttonSaveResults";
+			this.buttonSaveResults.Size = new System.Drawing.Size(166, 45);
+			this.buttonSaveResults.TabIndex = 1;
+			this.buttonSaveResults.Text = "Save";
+			this.buttonSaveResults.UseVisualStyleBackColor = true;
+			this.buttonSaveResults.Click += new System.EventHandler(this.buttonSaveResults_Click);
+			// 
+			// textBoxSaveName
+			// 
+			this.textBoxSaveName.Font = new System.Drawing.Font("Century Gothic", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.textBoxSaveName.Location = new System.Drawing.Point(91, 72);
+			this.textBoxSaveName.Name = "textBoxSaveName";
+			this.textBoxSaveName.Size = new System.Drawing.Size(184, 34);
+			this.textBoxSaveName.TabIndex = 0;
+			// 
+			// panelFuzzySets
+			// 
+			this.panelFuzzySets.Location = new System.Drawing.Point(35, 4);
+			this.panelFuzzySets.Name = "panelFuzzySets";
+			this.panelFuzzySets.Size = new System.Drawing.Size(552, 247);
+			this.panelFuzzySets.TabIndex = 3;
+			// 
 			// ilPanelResults
 			// 
 			this.ilPanelResults.Driver = ILNumerics.Drawing.RendererTypes.OpenGL;
@@ -491,73 +552,25 @@ namespace ANFIS
 			this.buttonSaveResult.UseVisualStyleBackColor = true;
 			this.buttonSaveResult.Click += new System.EventHandler(this.Save_Click);
 			// 
-			// panelSave
+			// buttonStop
 			// 
-			this.panelSave.Controls.Add(this.buttonCancel);
-			this.panelSave.Controls.Add(this.label1);
-			this.panelSave.Controls.Add(this.buttonSaveResults);
-			this.panelSave.Controls.Add(this.textBoxSaveName);
-			this.panelSave.Location = new System.Drawing.Point(141, 90);
-			this.panelSave.Name = "panelSave";
-			this.panelSave.Size = new System.Drawing.Size(361, 202);
-			this.panelSave.TabIndex = 2;
-			this.panelSave.Visible = false;
-			// 
-			// textBoxSaveName
-			// 
-			this.textBoxSaveName.Font = new System.Drawing.Font("Century Gothic", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.textBoxSaveName.Location = new System.Drawing.Point(91, 72);
-			this.textBoxSaveName.Name = "textBoxSaveName";
-			this.textBoxSaveName.Size = new System.Drawing.Size(184, 34);
-			this.textBoxSaveName.TabIndex = 0;
-			// 
-			// buttonSaveResults
-			// 
-			this.buttonSaveResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.buttonSaveResults.Location = new System.Drawing.Point(11, 129);
-			this.buttonSaveResults.Name = "buttonSaveResults";
-			this.buttonSaveResults.Size = new System.Drawing.Size(166, 45);
-			this.buttonSaveResults.TabIndex = 1;
-			this.buttonSaveResults.Text = "Save";
-			this.buttonSaveResults.UseVisualStyleBackColor = true;
-			this.buttonSaveResults.Click += new System.EventHandler(this.buttonSaveResults_Click);
-			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Font = new System.Drawing.Font("Century Gothic", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label1.Location = new System.Drawing.Point(91, 32);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(167, 25);
-			this.label1.TabIndex = 2;
-			this.label1.Text = "Save results as";
-			// 
-			// buttonCancel
-			// 
-			this.buttonCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.buttonCancel.Location = new System.Drawing.Point(183, 129);
-			this.buttonCancel.Name = "buttonCancel";
-			this.buttonCancel.Size = new System.Drawing.Size(166, 45);
-			this.buttonCancel.TabIndex = 3;
-			this.buttonCancel.Text = "Cancel";
-			this.buttonCancel.UseVisualStyleBackColor = true;
-			this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
-			// 
-			// panelFuzzySets
-			// 
-			this.panelFuzzySets.Location = new System.Drawing.Point(35, 4);
-			this.panelFuzzySets.Name = "panelFuzzySets";
-			this.panelFuzzySets.Size = new System.Drawing.Size(552, 247);
-			this.panelFuzzySets.TabIndex = 3;
+			this.buttonStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonStop.Location = new System.Drawing.Point(214, 460);
+			this.buttonStop.Name = "buttonStop";
+			this.buttonStop.Size = new System.Drawing.Size(208, 48);
+			this.buttonStop.TabIndex = 20;
+			this.buttonStop.Text = "Stop";
+			this.buttonStop.UseVisualStyleBackColor = true;
+			this.buttonStop.Visible = false;
 			// 
 			// Main
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(44)))), ((int)(((byte)(51)))));
 			this.ClientSize = new System.Drawing.Size(800, 600);
-			this.Controls.Add(this.panelResult);
-			this.Controls.Add(this.panelTrainSet);
 			this.Controls.Add(this.panelTrain);
+			this.Controls.Add(this.panelTrainSet);
+			this.Controls.Add(this.panelResult);
 			this.Controls.Add(this.panelSlider);
 			this.Controls.Add(this.titleBar);
 			this.Controls.Add(this.progressionPanel);
@@ -627,6 +640,7 @@ namespace ANFIS
 		private Button buttonSaveResults;
 		private TextBox textBoxSaveName;
 		private Panel panelFuzzySets;
+		private Button buttonStop;
 	}
 }
 

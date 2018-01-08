@@ -17,7 +17,7 @@ namespace ANFIS.ANN.Functions
 			{
 				sum += Math.Pow(expectedOutputs[i] - givenOutputs[i], 2);
 			}
-			return sum;
+			return sum / givenOutputs.Length;
 		}
 	}
 

@@ -8,8 +8,8 @@ namespace ANFIS.ANN.Functions
 {
 	public class Sigmoid : IActivationFunction
 	{
-		public double A { get; private set; }
-		public double B { get; private set; }
+		private double _a;
+		private double _b;
 
 		public Sigmoid()
 		{
@@ -18,42 +18,42 @@ namespace ANFIS.ANN.Functions
 
 		public Sigmoid(double a, double b)
 		{
-			A = a;
-			B = b;
+			_a = a;
+			_b = b;
 		}
 
 		public double ValueAt(double x)
 		{
-			double k = Math.Exp(B*(x - A));
-			return k / (1.0f + k);
+			double k = Math.Exp(_b*(x - _a));
+			return 1.0f / (1.0f + k);
 		}
 		
 		public void UpdateA(double correction)
 		{
-			A += correction;
+			_a += correction;
 		}
 
 		public void UpdateB(double correction)
 		{
-			B += correction;
+			_b += correction;
 		}
 
 		public void ResetWeights()
 		{
-			A = MathHandler.Rand.NextDouble();
-			B = MathHandler.Rand.NextDouble();
+			_a = MathHandler.Rand.NextDouble() * 2 - 1;
+			_b = MathHandler.Rand.NextDouble() * 2 - 1;
 		}
 
 		public double[] GetWeights()
 		{
-			return new[] {A, B};
+			return new[] {_a, _b};
 		}
 	}
 
 	public class Adaline : IActivationFunction
 	{
-		public double A { get; private set; }
-		public double B { get; private set; }
+		private double _a;
+		private double _b;
 
 		public Adaline()
 		{
@@ -62,8 +62,8 @@ namespace ANFIS.ANN.Functions
 
 		public Adaline(double a, double b)
 		{
-			A = a;
-			B = b;
+			_a = a;
+			_b = b;
 		}
 
 		public double ValueAt(double x)
@@ -73,23 +73,23 @@ namespace ANFIS.ANN.Functions
 
 		public void UpdateA(double correction)
 		{
-			A += correction;
+			_a += correction;
 		}
 
 		public void UpdateB(double correction)
 		{
-			B += correction;
+			_b += correction;
 		}
 
 		public void ResetWeights()
 		{
-			A = MathHandler.Rand.NextDouble() * 2 - 1;
-			B = MathHandler.Rand.NextDouble() * 2 - 1;
+			_a = MathHandler.Rand.NextDouble() * 2 - 1;
+			_b = MathHandler.Rand.NextDouble() * 2 - 1;
 		}
 
 		public double[] GetWeights()
 		{
-			return new[] { A, B };
+			return new[] { _a, _b };
 		}
 	}
 }

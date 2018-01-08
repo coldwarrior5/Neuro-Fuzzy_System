@@ -49,9 +49,9 @@ namespace ANFIS.Handlers.IO
 			_fileHandler.SaveFile(fileName, FileHandler.FunctionExtension, FormatData(result));
 		}
 
-		public void FormatAndSaveResult(string fileName, List<double> result)
+		public void FormatAndSaveResult(string fileName, List<double> result, Instance instance)
 		{
-			_fileHandler.SaveFile(fileName, FileHandler.ResultExtension, FormatData(result));
+			_fileHandler.SaveFile(fileName, FileHandler.ResultExtension, FormatData(result, instance));
 		}
 
 		private static string[] FormatData(Instance input)
@@ -80,9 +80,14 @@ namespace ANFIS.Handlers.IO
 			return result;
 		}
 
-		private static string[] FormatData(IReadOnlyList<double> input)
+		private static string[] FormatData(IReadOnlyList<double> input, Instance instance)
 		{
-			string[] result = new string[input.Count];
+			const int displacement = 3;
+			string[] result = new string[input.Count + displacement];
+
+			result[0] = InstanceInfo + SamplesInFile + " " + input.Count;
+			result[1] = InstanceInfo + FunctionString + " " + instance.OriginalFunction.ToString();
+			result[2] = EmptyLine;
 
 			for (var i = 0; i < input.Count; i++)
 			{

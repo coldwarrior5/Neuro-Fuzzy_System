@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using ANFIS.ANN.Functions;
 using ANFIS.ANN.Interfaces;
 using ANFIS.ANN.Structures;
+using ANFIS.Handlers.Mathematics.Interface;
 using ANFIS.Structures;
 using ILNumerics;
 using ILNumerics.Drawing;
@@ -18,6 +19,7 @@ namespace ANFIS.ANN
 {
 	public class NeuralNetwork
 	{
+		public bool Stop { get; set; }
 		public int NumberOfLayers { get; }
 		private INeuronLayer[] _layers;
 		private LayerInfo[] _architecture;
@@ -29,21 +31,24 @@ namespace ANFIS.ANN
 		public List<double> ErrorTimeline { get; }
 		public Instance Instance { get; }
 
-		private double[] _averageProbabilityOutcome;
+		private double[] _fuzzySetProbability;
 		private double[] _probabilityOutcome;
+		private double[] _averageProbabilityOutcome;
 		private double[] _z;
 
 		public const int RulesMin = 1;
-		public const int RulesDefault = 10;
+		public const int RulesDefault = 5;
 		public const int RulesMax = 50;
 
 		public const double EtaMin = 0.0001;
-		public const double EtaDefault = 0.01;
-		public const double EtaMax = 1;
+		public const double EtaDefault = 0.001;
+		public const double EtaMax = 0.01;
+
+		private const int EtaChangePeriod = 1000;
 
 		public const double DesiredErrorMin = 0;
-		public const double DesiredErrorDefault = 100;
-		public const double DesiredErrorMax = 10000;
+		public const double DesiredErrorDefault = 1;
+		public const double DesiredErrorMax = 100;
 
 		public const int IterationLimit = 100000;
 		public const int TimeLimit = 120; // in seconds
@@ -63,9 +68,11 @@ namespace ANFIS.ANN
 
 		private void InitNetwork()
 		{
+			Stop = false;
 			DefineArchitecture(out LayerInfo[] architecture);
-			if (_architecture is null || _architecture.Equals(architecture))
+			if (_architecture is null || !_architecture.Equals(architecture))
 			{
+				_z = new double[NumberOfRules];
 				_architecture = architecture;
 				for (int i = 0; i < NumberOfLayers; i++)
 					_layers[i] = new NeuronLayer(architecture[i], Instance.NumVariables);
@@ -84,7 +91,7 @@ namespace ANFIS.ANN
 			architecture[4] = new LayerInfo ( NumberOfRules, 1, NeuronType.Output );
 		}
 
-		public void Train(ILPanel panel, Label totalError, Button testNetwork)
+		public void Train(ILPanel panel, Label totalError)
 		{
 			InitNetwork();
 			int iter = 0;
@@ -94,21 +101,17 @@ namespace ANFIS.ANN
 			stopwatch.Start();
 			totalTime.Start();
 			ErrorTimeline.Add(TotalError);
-			while (TotalError > DesiredError && iter++ < IterationLimit && totalTime.Elapsed.TotalSeconds < TimeLimit)
+			while (!Stop && TotalError > DesiredError && iter++ < IterationLimit && totalTime.Elapsed.TotalSeconds < TimeLimit)
 			{
+				if (iter % EtaChangePeriod == 0)
+					Eta -= Eta / 10;
 				Backpropagation(batches);
-				stopwatch.Stop();
-				if (stopwatch.Elapsed.TotalSeconds < RefreshRate)
-				{
-					stopwatch.Start();
-					continue;
-				}
+				if (stopwatch.Elapsed.TotalSeconds < RefreshRate) continue;
 				Evaluate();
 				ErrorTimeline.Add(TotalError);
 				UpdateInfo(panel, totalError, this);
 				stopwatch.Restart();
 			}
-			testNetwork.Enabled = true;
 		}
 
 		private List<List<Sample>> FormBatches()
@@ -148,13 +151,10 @@ namespace ANFIS.ANN
 
 					// Determine layer outputs
 					double[] givenOutput = GetOutput(batches[i][j].Variables);
-					
+					GetZValues(batches[i][j].Variables);
 					CalculateAntecedentChange(ref antecedentChanges, batches[i][j].Value, givenOutput[0], batches[i][j].Variables, parameters);
 					CalculateConsequenceChange(ref consequenseChanges, batches[i][j].Value, givenOutput[0], batches[i][j].Variables);
 				}
-				// Need to average the change and assign learning rate
-				AverageAndMultiplyWithLearningRate(ref antecedentChanges, batches[i].Count);
-				AverageAndMultiplyWithLearningRate(ref consequenseChanges, batches[i].Count);
 				// Apply change after single batch
 				_layers[0].UpdateParameters(antecedentChanges);
 				_layers[3].UpdateParameters(consequenseChanges);
@@ -164,9 +164,18 @@ namespace ANFIS.ANN
 			}
 		}
 
+		private void GetZValues(double[] variables)
+		{
+			IAdaptingFunction[] functions = GetFunctions<IAdaptingFunction>(3);
+			for (int i = 0; i < functions.Length; i++)
+			{
+				_z[i] = functions[i].ValueAt(variables);
+			}
+		}
+
 		private void CalculateAntecedentChange(ref List<List<double>> changes, double expectedOutput, double givenOutput, double[] variables, List<double[]> parameters)
 		{
-			double difference = expectedOutput - givenOutput;
+			double difference = Eta * (expectedOutput - givenOutput);
 			CalculateDividend(out List<double> dividend);
 			CalculateDivisor(out double divisor);
 			for (int i = 0; i < Instance.NumVariables; i++)
@@ -177,11 +186,12 @@ namespace ANFIS.ANN
 					for (int k = 0; k < Instance.NumVariables; k++)
 					{
 						if(k == i) continue;
-						otherProbabilities *= _probabilityOutcome[k * NumberOfRules + j];
+						otherProbabilities *= _fuzzySetProbability[k * NumberOfRules + j];
 					}
-					double tempValue = difference * (dividend[j] / divisor) *_probabilityOutcome[i * NumberOfRules + j] * (1 - _probabilityOutcome[i * NumberOfRules + j]) * otherProbabilities;
-					changes[i * NumberOfRules + j][0] += tempValue * parameters[i][1];
-					changes[i * NumberOfRules + j][1] += tempValue * (parameters[i][0] - variables[i]);
+					double tempValue = difference * (dividend[j] / divisor) * _fuzzySetProbability[i * NumberOfRules + j] * (1 - _fuzzySetProbability[i * NumberOfRules + j]) * otherProbabilities;
+					changes[i * NumberOfRules + j][0] += tempValue * parameters[i * NumberOfRules + j][1];
+					changes[i * NumberOfRules + j][1] += tempValue * (parameters[i * NumberOfRules + j][0] - variables[i]);
+
 				}
 			}
 		}
@@ -190,20 +200,23 @@ namespace ANFIS.ANN
 		{
 			divisor = 0;
 			for (int i = 0; i < NumberOfRules; i++)
-			{
-				divisor += Math.Pow(_averageProbabilityOutcome[i], 2);
-			}
+				divisor += _probabilityOutcome[i];
+			
+			divisor = Math.Pow(divisor, 2);
+			divisor = divisor < double.Epsilon ? double.Epsilon : divisor;
 		}
 
 		private void CalculateDividend(out List<double> dividend)
 		{
-			dividend = new List<double>(new double[NumberOfRules]);
-
+			dividend = new List<double>();
+			for (int i = 0; i < NumberOfRules; i++)
+				dividend.Add(0);
+			
 			for (int i = 0; i < NumberOfRules; i++)
 			{
 				for (int j = 0; j < NumberOfRules; j++)
 				{
-					dividend[i] += _averageProbabilityOutcome[j] * (_z[i] - _z[j]);
+					dividend[i] += _probabilityOutcome[j] * (_z[i] - _z[j]);
 				}
 			}
 		}
@@ -212,21 +225,13 @@ namespace ANFIS.ANN
 		{
 			for (int i = 0; i < NumberOfRules; i++)
 			{
-				double tempValue = (expectedOutput - givenOutput) * _averageProbabilityOutcome[i];
+				double tempValue = Eta * (expectedOutput - givenOutput) * _averageProbabilityOutcome[i];
 				for (int j = 0; j < Instance.NumVariables; j++)
 					changes[i][j] += tempValue * variables[j];
 				changes[i][Instance.NumVariables] += tempValue;
 			}
 		}
 
-		private void AverageAndMultiplyWithLearningRate(ref List<List<double>> changes, int batchSize)
-		{
-			for (int i = 0; i < changes.Count; i++)
-			{
-				for (int j = 0; j < changes[i].Count; j++)
-					changes[i][j] = changes[i][j] / batchSize * Eta;
-			}
-		}
 
 		private void InitChanges(out List<List<double>> changes, int size, int variableSize)
 		{
@@ -273,13 +278,13 @@ namespace ANFIS.ANN
 					switch (i)
 					{
 						case 0:
+							_fuzzySetProbability = tempInputs;
+							break;
+						case 1:
 							_probabilityOutcome = tempInputs;
 							break;
 						case 2:
 							_averageProbabilityOutcome = tempInputs;
-							break;
-						case 3:
-							_z = tempInputs;
 							break;
 					}
 				}
@@ -465,17 +470,19 @@ namespace ANFIS.ANN
 			panel.AutoScroll = true;
 			panel.AutoSize = false;
 
-			TableLayoutPanel table = new TableLayoutPanel();
-			table.Dock = DockStyle.None;
-			table.AutoSize = true;
-			table.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-			table.AutoScroll = false;
+			TableLayoutPanel table = new TableLayoutPanel
+			{
+				Dock = DockStyle.None,
+				AutoSize = true,
+				AutoSizeMode = AutoSizeMode.GrowAndShrink,
+				AutoScroll = false
+			};
 			int numVariables = ann.Instance.NumVariables;
 			int numRules = ann.NumberOfRules;
 			var columnCount = numRules;
 			int rowCount = numVariables;
 
-			IActivationFunction[] func = ann.GetFunctions();
+			IActivationFunction[] func = ann.GetFunctions<IActivationFunction>(0);
 			double[] xValues = new double[50];
 			double[] yValues = new double[50];
 			for (int i = 0; i < 50; i++)
@@ -512,14 +519,15 @@ namespace ANFIS.ANN
 				}
 			}
 			panel.Controls.Add(table);
+			panel.Refresh();
 		}
 
-		private IActivationFunction[] GetFunctions()
+		private T[] GetFunctions<T>(int layer)
 		{
-			IActivationFunction[] functions = new IActivationFunction[_architecture[0].NumberOfNeurons];
-			for (int i = 0; i < _architecture[0].NumberOfNeurons; i++)
+			T[] functions = new T[_architecture[layer].NumberOfNeurons];
+			for (int i = 0; i < _architecture[layer].NumberOfNeurons; i++)
 			{
-				functions[i] = _layers[0].GetFunction(i);
+				functions[i] = _layers[layer].GetFunction<T>(i);
 			}
 			return functions;
 		}

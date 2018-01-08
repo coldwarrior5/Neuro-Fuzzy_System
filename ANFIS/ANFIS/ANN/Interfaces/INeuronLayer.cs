@@ -8,6 +8,6 @@ namespace ANFIS.ANN.Interfaces
 		void ResetLayer();
 		void UpdateParameters(List<List<double>> correction);
 		double[] GetParameters(int index);
-		IActivationFunction GetFunction(int index);
+		T GetFunction<T>(int index);
 	}
 }

@@ -85,8 +85,14 @@ namespace ANFIS.Handlers.Mathematics
 		{
 			if (correction.Length != _numParameters)
 				throw new ArgumentException("This function has exactly " + _numParameters + " parameters.");
+
 			for (int i = 0; i < _numParameters; i++)
+			{
+				if (correction[i] is double.NaN)
+					return;
 				_parameters[i] += correction[i];
+			}
+				
 		}
 
 		public void UpdateParameters(List<double> correction)

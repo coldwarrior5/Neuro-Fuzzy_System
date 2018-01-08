@@ -8,7 +8,7 @@ namespace ANFIS.ANN
 {
 	public class NeuronLayer : INeuronLayer
 	{
-		public LayerInfo Architecture { get; private set; }
+		public LayerInfo Architecture { get; }
 		private readonly int _numberOfVariables;
 		private INeuron[] _neurons;
 
@@ -57,7 +57,6 @@ namespace ANFIS.ANN
 			int rules = Architecture.NumberOfNeurons / variables.Length;
 			for (int i = 0; i < Architecture.NumberOfNeurons; i++)
 			{
-				// If the input size is 1 we need to create new array of 1 element
 				switch (Architecture.Type)
 				{
 					case NeuronType.Input:
@@ -110,9 +109,9 @@ namespace ANFIS.ANN
 			return _neurons[index].GetParameters();
 		}
 
-		public IActivationFunction GetFunction(int index)
+		public T GetFunction<T>(int index)
 		{
-			return _neurons[index].GetFunction();
+			return _neurons[index].GetFunction<T>();
 		}
 	}
 }

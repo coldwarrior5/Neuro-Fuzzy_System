@@ -179,8 +179,9 @@ namespace ANFIS
 		private void Train_Click(object sender, EventArgs e)
 		{
 			Train.Visible = false;
+			buttonCancel.Visible = true;
+			_ann.Train(ilPanelFunctions, labelTotalError);
 			GoToResults.Visible = true;
-			_ann.Train(ilPanelFunctions, labelTotalError, GoToResults);
 		}
 
 		private void GoToTest_Click(object sender, EventArgs e)
@@ -228,7 +229,7 @@ namespace ANFIS
 		private void buttonSaveResults_Click(object sender, EventArgs e)
 		{
 			panelSave.Visible = false;
-			_parser.FormatAndSaveResult(textBoxSaveName.Text, _ann.ErrorTimeline);
+			_parser.FormatAndSaveResult(textBoxSaveName.Text, _ann.ErrorTimeline, _instance);
 		}
 
 		private void ButtonTest_Click(object sender, EventArgs e)

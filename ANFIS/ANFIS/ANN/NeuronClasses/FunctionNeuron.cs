@@ -41,9 +41,9 @@ namespace ANFIS.ANN.NeuronClasses
 			return _function.GetParameters();
 		}
 
-		public IActivationFunction GetFunction()
+		public T GetFunction<T>()
 		{
-			return null;
+			return (T) _function;
 		}
 
 		public double GetOutput(double[] input, int position, double[] variables)

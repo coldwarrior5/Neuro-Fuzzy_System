@@ -50,9 +50,9 @@ namespace ANFIS.ANN.NeuronClasses
 			return _function.GetWeights();
 		}
 
-		public IActivationFunction GetFunction()
+		public T GetFunction<T>()
 		{
-			return _function;
+			return (T)_function;
 		}
 
 		private void UpdateA(double correction)

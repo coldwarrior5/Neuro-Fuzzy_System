@@ -9,6 +9,6 @@ namespace ANFIS.ANN.Interfaces
 		void UpdateParameters(double[] correction);
 		void UpdateParameters(List<double> correction);
 		double[] GetParameters();
-		IActivationFunction GetFunction();
+		T GetFunction<T>();
 	}
 }
