@@ -131,12 +131,14 @@ namespace ANFIS.Handlers.GUI
 	{
 		private readonly NeuralNetwork _ann;
 		private readonly BackgroundWorker _worker;
+		private readonly Button _train;
 		private readonly Button _stop;
 		private readonly Button _result;
 
-		public Worker(NeuralNetwork ann, Button stop, Button result)
+		public Worker(NeuralNetwork ann, Button train, Button stop, Button result)
 		{
 			_ann = ann;
+			_train = train;
 			_stop = stop;
 			_result = result;
 			_worker = new BackgroundWorker();
@@ -152,7 +154,9 @@ namespace ANFIS.Handlers.GUI
 		void worker_Finished(object sender, RunWorkerCompletedEventArgs e)
 		{
 			_stop.Visible = false;
-			_result.Visible = true;
+			// If stopped show train button
+			_result.Visible = !(bool) e.Result;
+			_train.Visible = (bool) e.Result;
 		}
 	}
 }

@@ -21,6 +21,7 @@ namespace ANFIS.ANN
 	public class NeuralNetwork
 	{
 		public bool Stop { get; set; }
+		public bool ForcedStop { get; set; }
 		public int NumberOfLayers { get; }
 		private INeuronLayer[] _layers;
 		private LayerInfo[] _architecture;
@@ -38,10 +39,11 @@ namespace ANFIS.ANN
 		private double[] _probabilityOutcome;
 		private double[] _averageProbabilityOutcome;
 		private double[] _z;
+		private double _eta;
 
 		public const int RulesMin = 1;
 		public const int RulesDefault = 5;
-		public const int RulesMax = 50;
+		public const int RulesMax = 20;
 
 		public const double EtaMin = 0.0001;
 		public const double EtaDefault = 0.001;
@@ -50,7 +52,7 @@ namespace ANFIS.ANN
 		private const int EtaChangePeriod = 1000;
 
 		public const double DesiredErrorMin = 0;
-		public const double DesiredErrorDefault = 1;
+		public const double DesiredErrorDefault = 2;
 		public const double DesiredErrorMax = 100;
 
 		public const int IterationLimit = 100000;
@@ -74,6 +76,7 @@ namespace ANFIS.ANN
 		private void InitNetwork()
 		{
 			Stop = false;
+			ForcedStop = false;
 			DefineArchitecture(out LayerInfo[] architecture);
 			if (_architecture is null || !_architecture.Equals(architecture))
 			{
@@ -106,10 +109,11 @@ namespace ANFIS.ANN
 			stopwatch.Start();
 			totalTime.Start();
 			ErrorTimeline.Add(TotalError);
-			while (!Stop && TotalError > DesiredError && iter++ < IterationLimit && totalTime.Elapsed.TotalSeconds < TimeLimit)
+			_eta = Eta;
+			while (!Stop && !ForcedStop && TotalError > DesiredError && iter++ < IterationLimit && totalTime.Elapsed.TotalSeconds < TimeLimit)
 			{
 				if (iter % EtaChangePeriod == 0)
-					Eta -= Eta / 10;
+					_eta -= _eta / 10;
 				Backpropagation(batches);
 				Evaluate();
 				ErrorTimeline.Add(TotalError);
@@ -117,6 +121,7 @@ namespace ANFIS.ANN
 				UpdateInfo(_panel, _label, this);
 				stopwatch.Restart();
 			}
+			e.Result = ForcedStop;
 		}
 
 		private List<List<Sample>> FormBatches()

@@ -95,6 +95,7 @@ namespace ANFIS
 		{
 			if (!(sender is Panel panel)) return;
 			if (!panel.Visible) return;
+				
 			InputParams.FillTrainSetChoices(loadTrainSet, comboBoxFunction);
 			buttonLoadTrainSet.Enabled = loadTrainSet.SelectedItem != null;
 		}
@@ -127,6 +128,8 @@ namespace ANFIS
 			buttonTrain.Enabled = false;
 			buttonResult.Enabled = false;
 			UiHandler.PanelVisible(panelTrainSet, _panels);
+			if (!(_ann is null))
+				_ann.ForcedStop = true;
 		}
 		// ______________________________________________________________
 
@@ -138,6 +141,9 @@ namespace ANFIS
 		{
 			if (!(sender is Panel panel)) return;
 			if (!panel.Visible) return;
+
+			Train.Visible = true;
+			GoToResults.Visible = false;
 			SetNeuralNetwork();
 			NeuralNetwork.FillTrainChoices(ilPanelFunctions, labelTotalError, textBoxRules, comboBoxType, textBoxEta, textBoxDesiredError, _ann);
 		}
@@ -181,7 +187,7 @@ namespace ANFIS
 		{
 			Train.Visible = false;
 			buttonStop.Visible = true;
-			Worker worker = new Worker(_ann, buttonStop, GoToResults);
+			Worker worker = new Worker(_ann, Train, buttonStop, GoToResults);
 			worker.Start();
 		}
 
@@ -201,6 +207,8 @@ namespace ANFIS
 
 		private void ButtonTrain_Click(object sender, EventArgs e)
 		{
+			if (!(_ann is null))
+				_ann.ForcedStop = true;
 			Train.Visible = true;
 			buttonStop.Visible = false;
 			GoToResults.Visible = false;
