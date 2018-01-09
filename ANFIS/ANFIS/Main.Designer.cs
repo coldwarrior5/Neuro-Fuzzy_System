@@ -62,8 +62,8 @@ namespace ANFIS
 			this.labelDesiredError = new System.Windows.Forms.Label();
 			this.labelEta = new System.Windows.Forms.Label();
 			this.labelType = new System.Windows.Forms.Label();
-			this.GoToResults = new System.Windows.Forms.Button();
 			this.buttonStop = new System.Windows.Forms.Button();
+			this.GoToResults = new System.Windows.Forms.Button();
 			this.Train = new System.Windows.Forms.Button();
 			this.panelResult = new System.Windows.Forms.Panel();
 			this.panelSave = new System.Windows.Forms.Panel();
@@ -433,18 +433,6 @@ namespace ANFIS
 			this.labelType.TabIndex = 7;
 			this.labelType.Text = "Backpropagation type:";
 			// 
-			// GoToResults
-			// 
-			this.GoToResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.GoToResults.Location = new System.Drawing.Point(214, 460);
-			this.GoToResults.Name = "GoToResults";
-			this.GoToResults.Size = new System.Drawing.Size(207, 48);
-			this.GoToResults.TabIndex = 2;
-			this.GoToResults.Text = "See results";
-			this.GoToResults.UseVisualStyleBackColor = true;
-			this.GoToResults.Visible = false;
-			this.GoToResults.Click += new System.EventHandler(this.GoToResult_Click);
-			// 
 			// buttonStop
 			// 
 			this.buttonStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -456,6 +444,18 @@ namespace ANFIS
 			this.buttonStop.UseVisualStyleBackColor = true;
 			this.buttonStop.Visible = false;
 			this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
+			// 
+			// GoToResults
+			// 
+			this.GoToResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.GoToResults.Location = new System.Drawing.Point(214, 460);
+			this.GoToResults.Name = "GoToResults";
+			this.GoToResults.Size = new System.Drawing.Size(207, 48);
+			this.GoToResults.TabIndex = 2;
+			this.GoToResults.Text = "See results";
+			this.GoToResults.UseVisualStyleBackColor = true;
+			this.GoToResults.Visible = false;
+			this.GoToResults.Click += new System.EventHandler(this.GoToResult_Click);
 			// 
 			// Train
 			// 
@@ -569,8 +569,8 @@ namespace ANFIS
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(44)))), ((int)(((byte)(51)))));
 			this.ClientSize = new System.Drawing.Size(800, 600);
-			this.Controls.Add(this.panelTrain);
 			this.Controls.Add(this.panelTrainSet);
+			this.Controls.Add(this.panelTrain);
 			this.Controls.Add(this.panelResult);
 			this.Controls.Add(this.panelSlider);
 			this.Controls.Add(this.titleBar);

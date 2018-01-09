@@ -58,7 +58,7 @@ namespace ANFIS.ANN
 		public const int IterationLimit = 100000;
 		public const int TimeLimit = 120; // in seconds
 
-		public const double RefreshRate = 0.5;
+		public const double RefreshRate = 0.25;
 
 		public NeuralNetwork(Instance instance, ILPanel panel, Label label)
 		{
@@ -277,6 +277,11 @@ namespace ANFIS.ANN
 			}
 		}
 
+		public void GoToResult()
+		{
+			NumberOfRules = _architecture[1].NumberOfNeurons;
+		}
+
 		public double[] GetOutput(double[] inputs)
 		{
 			double[] tempInputs = inputs;
@@ -436,8 +441,8 @@ namespace ANFIS.ANN
 		public static void FillTypeChoices(ComboBox box)
 		{
 			box.Items.Clear();
-			box.Items.Add(BackpropagationHandler.ToString(BackpropagationType.Batch));
 			box.Items.Add(BackpropagationHandler.ToString(BackpropagationType.Online));
+			box.Items.Add(BackpropagationHandler.ToString(BackpropagationType.Batch));
 			box.SelectedItem = box.Items[0];
 		}
 
@@ -522,13 +527,18 @@ namespace ANFIS.ANN
 						yValues[k] = func[i * columnCount + j].ValueAt(xValues[k]);
 					}
 					ILArray<float> ys = (double[])yValues.Clone();
-					newPanel.Scene.Add(new ILPlotCube{new ILLinePlot(xs, ys, lineWidth: 2, lineColor: Color.Black) });
+					newPanel.Scene.Remove(newPanel.Scene.First<ILPlotCube>());
+					newPanel.Scene.Add(new ILPlotCube{
+						Children =
+						{
+							new ILLinePlot(xs, ys, lineWidth:2 , lineColor:Color.Black)
+						}});
 					newPanel.Scene.Screen.Add(new ILLabel(label)
 					{
 						Position = new Vector3(1, 0, 0),
 						Anchor = new PointF(1, 0)
 					});
-
+					newPanel.Refresh();
 					table.ColumnCount++;
 					table.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
 					table.Controls.Add(newPanel, j, i);

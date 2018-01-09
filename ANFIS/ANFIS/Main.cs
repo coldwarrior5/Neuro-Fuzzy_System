@@ -127,6 +127,7 @@ namespace ANFIS
 			InputParams.FillTrainSetChoices(loadTrainSet, comboBoxFunction);
 			buttonTrain.Enabled = false;
 			buttonResult.Enabled = false;
+			panelFunction.Visible = false;
 			UiHandler.PanelVisible(panelTrainSet, _panels);
 			if (!(_ann is null))
 				_ann.ForcedStop = true;
@@ -199,6 +200,7 @@ namespace ANFIS
 		private void GoToResult_Click(object sender, EventArgs e)
 		{
 			Train.Visible = true;
+			_ann.GoToResult();
 			GoToResults.Visible = false;
 			UiHandler.PanelVisible(panelResult, _panels);
 			buttonResult.Enabled = true;
