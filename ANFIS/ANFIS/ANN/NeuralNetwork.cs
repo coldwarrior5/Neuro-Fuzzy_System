@@ -33,26 +33,28 @@ namespace ANFIS.ANN
 		public List<double> ErrorTimeline { get; }
 		public Instance Instance { get; }
 		private ILPanel _panel;
-		private Label _label;
+		private Label _iter;
+		private Label _error;
 
 		private double[] _fuzzySetProbability;
 		private double[] _probabilityOutcome;
 		private double[] _averageProbabilityOutcome;
 		private double[] _z;
 		private double _eta;
+		public int Iter { get; private set; }
 
 		public const int RulesMin = 1;
 		public const int RulesDefault = 5;
 		public const int RulesMax = 20;
 
-		public const double EtaMin = 0.0001;
+		public const double EtaMin = 0.000001;
 		public const double EtaDefault = 0.001;
 		public const double EtaMax = 0.01;
 
-		private const int EtaChangePeriod = 1000;
+		private const int EtaChangePeriod = 100;
 
 		public const double DesiredErrorMin = 0;
-		public const double DesiredErrorDefault = 2;
+		public const double DesiredErrorDefault = 0;
 		public const double DesiredErrorMax = 100;
 
 		public const int IterationLimit = 100000;
@@ -60,11 +62,12 @@ namespace ANFIS.ANN
 
 		public const double RefreshRate = 0.25;
 
-		public NeuralNetwork(Instance instance, ILPanel panel, Label label)
+		public NeuralNetwork(Instance instance, ILPanel panel, Label iter, Label error)
 		{
 			Instance = instance;
 			_panel = panel;
-			_label = label;
+			_iter = iter;
+			_error = error;
 			NumberOfRules = RulesDefault;
 			DesiredError = DesiredErrorDefault;
 			Eta = EtaDefault;
@@ -77,6 +80,7 @@ namespace ANFIS.ANN
 		{
 			Stop = false;
 			ForcedStop = false;
+			Iter = 0;
 			DefineArchitecture(out LayerInfo[] architecture);
 			if (_architecture is null || !_architecture.Equals(architecture))
 			{
@@ -102,7 +106,6 @@ namespace ANFIS.ANN
 		public void Train(object sender, DoWorkEventArgs e)
 		{
 			InitNetwork();
-			int iter = 0;
 			List<List<Sample>> batches = FormBatches();
 			Stopwatch totalTime = new Stopwatch();
 			Stopwatch stopwatch = new Stopwatch();
@@ -110,15 +113,15 @@ namespace ANFIS.ANN
 			totalTime.Start();
 			ErrorTimeline.Add(TotalError);
 			_eta = Eta;
-			while (!Stop && !ForcedStop && TotalError > DesiredError && iter++ < IterationLimit && totalTime.Elapsed.TotalSeconds < TimeLimit)
+			while (!Stop && !ForcedStop && TotalError > DesiredError && Iter++ < IterationLimit && totalTime.Elapsed.TotalSeconds < TimeLimit)
 			{
-				if (iter % EtaChangePeriod == 0)
-					_eta -= _eta / 10;
+				if (Iter % EtaChangePeriod == 0)
+					_eta -= _eta / 20;
 				Backpropagation(batches);
 				Evaluate();
 				ErrorTimeline.Add(TotalError);
 				if (stopwatch.Elapsed.TotalSeconds < RefreshRate) continue;
-				UpdateInfo(_panel, _label, this);
+				UpdateInfo(_panel, _iter, _error, this);
 				stopwatch.Restart();
 			}
 			e.Result = ForcedStop;
@@ -165,6 +168,9 @@ namespace ANFIS.ANN
 					CalculateAntecedentChange(ref antecedentChanges, batches[i][j].Value, givenOutput[0], batches[i][j].Variables, parameters);
 					CalculateConsequenceChange(ref consequenseChanges, batches[i][j].Value, givenOutput[0], batches[i][j].Variables);
 				}
+				// Add learning rate
+				AddLearningRate(ref antecedentChanges);
+				AddLearningRate(ref consequenseChanges);
 				// Apply change after single batch
 				_layers[0].UpdateParameters(antecedentChanges);
 				_layers[3].UpdateParameters(consequenseChanges);
@@ -185,7 +191,7 @@ namespace ANFIS.ANN
 
 		private void CalculateAntecedentChange(ref List<List<double>> changes, double expectedOutput, double givenOutput, double[] variables, List<double[]> parameters)
 		{
-			double difference = Eta * (expectedOutput - givenOutput);
+			double difference = expectedOutput - givenOutput;
 			CalculateDividend(out List<double> dividend);
 			CalculateDivisor(out double divisor);
 			for (int i = 0; i < Instance.NumVariables; i++)
@@ -235,13 +241,23 @@ namespace ANFIS.ANN
 		{
 			for (int i = 0; i < NumberOfRules; i++)
 			{
-				double tempValue = Eta * (expectedOutput - givenOutput) * _averageProbabilityOutcome[i];
+				double tempValue = (expectedOutput - givenOutput) * _averageProbabilityOutcome[i];
 				for (int j = 0; j < Instance.NumVariables; j++)
 					changes[i][j] += tempValue * variables[j];
 				changes[i][Instance.NumVariables] += tempValue;
 			}
 		}
 
+		private void AddLearningRate(ref List<List<double>> changes)
+		{
+			for (int i = 0; i < changes.Count; i++)
+			{
+				for (int j = 0; j < changes[i].Count; j++)
+				{
+					changes[i][j] *= Eta;
+				}
+			}
+		}
 
 		private void InitChanges(out List<List<double>> changes, int size, int variableSize)
 		{
@@ -268,6 +284,7 @@ namespace ANFIS.ANN
 		public void ResetTraining()
 		{
 			TotalError = 0;
+			Iter = 0;
 			ErrorTimeline.Clear();
 			if (_architecture is null)
 				return;
@@ -341,11 +358,12 @@ namespace ANFIS.ANN
 			return result;
 		}
 
-		public static void FillTrainChoices(ILPanel panel, Label totalError, TextBox rules, ComboBox backpropagationType, TextBox eta, TextBox desiredError, NeuralNetwork ann)
+		public static void FillTrainChoices(ILPanel panel, Label currentIteration, Label totalError, TextBox rules, ComboBox backpropagationType, TextBox eta, TextBox desiredError, NeuralNetwork ann)
 		{
 			InitPanel(panel, ann);
 			totalError.Text = ann.TotalError.ToString(CultureInfo.InvariantCulture);
 			rules.Text = RulesDefault.ToString(CultureInfo.InvariantCulture);
+			currentIteration.Text = ann.Iter.ToString(CultureInfo.InvariantCulture);
 			FillTypeChoices(backpropagationType);
 			eta.Text = EtaDefault.ToString(CultureInfo.InvariantCulture);
 			desiredError.Text = DesiredErrorDefault.ToString(CultureInfo.InvariantCulture);
@@ -406,13 +424,18 @@ namespace ANFIS.ANN
 			panel.Refresh();
 		}
 		
-		public static void UpdateInfo(ILPanel panel, Label totalError, NeuralNetwork ann)
+		public static void UpdateInfo(ILPanel panel, Label currentIter, Label totalError, NeuralNetwork ann)
 		{
 			DrawFunctions(panel, ann);
 			totalError.Invoke((Action)delegate
 			{
 				totalError.Text = ann.TotalError.ToString(CultureInfo.InvariantCulture);
 				totalError.Update();
+			});
+			currentIter.Invoke((Action)delegate
+			{
+				currentIter.Text = ann.Iter.ToString(CultureInfo.InvariantCulture);
+				currentIter.Update();
 			});
 		}
 

@@ -74,6 +74,8 @@ namespace ANFIS
 			this.panelFuzzySets = new System.Windows.Forms.Panel();
 			this.ilPanelResults = new ILNumerics.Drawing.ILPanel();
 			this.buttonSaveResult = new System.Windows.Forms.Button();
+			this.labelIteration = new System.Windows.Forms.Label();
+			this.labelCurrentIteration = new System.Windows.Forms.Label();
 			this.progressionPanel.SuspendLayout();
 			this.titleBar.SuspendLayout();
 			this.panelTrainSet.SuspendLayout();
@@ -308,6 +310,8 @@ namespace ANFIS
 			// 
 			// panelTrain
 			// 
+			this.panelTrain.Controls.Add(this.labelCurrentIteration);
+			this.panelTrain.Controls.Add(this.labelIteration);
 			this.panelTrain.Controls.Add(this.ilPanelFunctions);
 			this.panelTrain.Controls.Add(this.textBoxRules);
 			this.panelTrain.Controls.Add(this.labelRules);
@@ -443,7 +447,7 @@ namespace ANFIS
 			this.buttonStop.Text = "Stop";
 			this.buttonStop.UseVisualStyleBackColor = true;
 			this.buttonStop.Visible = false;
-			this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
+			this.buttonStop.Click += new System.EventHandler(this.ButtonStop_Click);
 			// 
 			// GoToResults
 			// 
@@ -502,7 +506,7 @@ namespace ANFIS
 			this.buttonCancel.TabIndex = 3;
 			this.buttonCancel.Text = "Cancel";
 			this.buttonCancel.UseVisualStyleBackColor = true;
-			this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+			this.buttonCancel.Click += new System.EventHandler(this.ButtonCancel_Click);
 			// 
 			// label1
 			// 
@@ -523,7 +527,7 @@ namespace ANFIS
 			this.buttonSaveResults.TabIndex = 1;
 			this.buttonSaveResults.Text = "Save";
 			this.buttonSaveResults.UseVisualStyleBackColor = true;
-			this.buttonSaveResults.Click += new System.EventHandler(this.buttonSaveResults_Click);
+			this.buttonSaveResults.Click += new System.EventHandler(this.ButtonSaveResults_Click);
 			// 
 			// textBoxSaveName
 			// 
@@ -564,13 +568,31 @@ namespace ANFIS
 			this.buttonSaveResult.UseVisualStyleBackColor = true;
 			this.buttonSaveResult.Click += new System.EventHandler(this.Save_Click);
 			// 
+			// labelIteration
+			// 
+			this.labelIteration.AutoSize = true;
+			this.labelIteration.Location = new System.Drawing.Point(10, 285);
+			this.labelIteration.Name = "labelIteration";
+			this.labelIteration.Size = new System.Drawing.Size(82, 21);
+			this.labelIteration.TabIndex = 21;
+			this.labelIteration.Text = "Iteration:";
+			// 
+			// labelCurrentIteration
+			// 
+			this.labelCurrentIteration.AutoSize = true;
+			this.labelCurrentIteration.Location = new System.Drawing.Point(94, 285);
+			this.labelCurrentIteration.Name = "labelCurrentIteration";
+			this.labelCurrentIteration.Size = new System.Drawing.Size(19, 21);
+			this.labelCurrentIteration.TabIndex = 22;
+			this.labelCurrentIteration.Text = "0";
+			// 
 			// Main
 			// 
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(41)))), ((int)(((byte)(44)))), ((int)(((byte)(51)))));
 			this.ClientSize = new System.Drawing.Size(800, 600);
-			this.Controls.Add(this.panelTrainSet);
 			this.Controls.Add(this.panelTrain);
+			this.Controls.Add(this.panelTrainSet);
 			this.Controls.Add(this.panelResult);
 			this.Controls.Add(this.panelSlider);
 			this.Controls.Add(this.titleBar);
@@ -642,6 +664,8 @@ namespace ANFIS
 		private TextBox textBoxSaveName;
 		private Panel panelFuzzySets;
 		private Button buttonStop;
+		private Label labelCurrentIteration;
+		private Label labelIteration;
 	}
 }
 

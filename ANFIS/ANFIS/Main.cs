@@ -43,7 +43,8 @@ namespace ANFIS
 		private void SetNeuralNetwork()
 		{
 			if(_ann is null || !_ann.Instance.Equals(_instance))
-				_ann = new NeuralNetwork(_instance, ilPanelFunctions, labelTotalError);
+				_ann = new NeuralNetwork(_instance, ilPanelFunctions, labelCurrentIteration, labelTotalError);
+			_ann.ResetTraining();
 		}
 		// ______________________________________________________________
 
@@ -146,7 +147,7 @@ namespace ANFIS
 			Train.Visible = true;
 			GoToResults.Visible = false;
 			SetNeuralNetwork();
-			NeuralNetwork.FillTrainChoices(ilPanelFunctions, labelTotalError, textBoxRules, comboBoxType, textBoxEta, textBoxDesiredError, _ann);
+			NeuralNetwork.FillTrainChoices(ilPanelFunctions, labelCurrentIteration, labelTotalError, textBoxRules, comboBoxType, textBoxEta, textBoxDesiredError, _ann);
 		}
 
 		private void Rules_Changed(object sender, KeyEventArgs e)
@@ -192,7 +193,7 @@ namespace ANFIS
 			worker.Start();
 		}
 
-		private void buttonStop_Click(object sender, EventArgs e)
+		private void ButtonStop_Click(object sender, EventArgs e)
 		{
 			_ann.Stop = true;
 		}
@@ -237,12 +238,12 @@ namespace ANFIS
 			panelSave.Visible = true;
 		}
 		
-		private void buttonCancel_Click(object sender, EventArgs e)
+		private void ButtonCancel_Click(object sender, EventArgs e)
 		{
 			panelSave.Visible = false;
 		}
 
-		private void buttonSaveResults_Click(object sender, EventArgs e)
+		private void ButtonSaveResults_Click(object sender, EventArgs e)
 		{
 			panelSave.Visible = false;
 			_parser.FormatAndSaveResult(textBoxSaveName.Text, _ann.ErrorTimeline, _instance);
