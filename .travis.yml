@@ -1,2 +1,2 @@
 language: csharp
-solution: ANFIS.sln
+solution: ANFIS/ANFIS.sln
